@@ -1,0 +1,28 @@
+import 'package:flutter/cupertino.dart';
+
+///General
+///...
+const BACKGROUND_COLOR = Color.fromRGBO(19, 19, 19, 1.0);
+const PRIMARY_COLOR = Color.fromRGBO(0, 255, 106, 1.0);
+const SECONDARY_COLOR = Color.fromRGBO(255, 255, 255, 1.0);
+
+///Specific
+///MOVIE VIEW
+const MOVIE_PAGE_TEXT_COLOR = Color.fromRGBO(136, 136, 136, 1.0);
+const MOVIE_PAGE_ICON_SHADOW = Color.fromRGBO(51, 51, 51, 0.5);
+const MOVIE_PAGE_TEXT_BUTTON_BACKGROUND_COLOR = Color.fromRGBO(68, 68, 68, 0.5);
+const MOVIE_PAGE_TEXT_BUTTON_COLOR = Color.fromRGBO(85, 85, 85, 1);
+
+///MOVIE DETAIL
+const MOVIE_DETAIL_RADIUS_COLOR_ONE = Color.fromRGBO(34, 34, 34, 0.8);
+const MOVIE_DETAIL_RADIUS_COLOR_TWO = Color.fromRGBO(17, 17, 17, 0.6);
+const MOVIE_DETAIL_BOX_SHADOW_COLOR = Color.fromRGBO(51, 51, 51, 0.5);
+
+///CHOOSE CINEMA SECTION
+const AVAILABLE_BACKGROUND_COLOR = Color.fromRGBO(34, 34, 34, 1);
+const AVAILABLE_ITEM_COLOR_TWO = Color.fromRGBO(255, 122, 0, 1);
+const AVAILABLE_ITEM_COLOR_THREE = Color.fromRGBO(255, 0, 184, 1);
+
+///CHECKOUT PAGE
+const CHECKOUT_GRADIENT_COLOR_ONE = Color.fromRGBO(68, 68, 68, 1);
+const CHECKOUT_GRADIENT_COLOR_TWO = Color.fromRGBO(34, 34, 34, 1);
