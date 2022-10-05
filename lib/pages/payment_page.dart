@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/models/movie_model.dart';
+import 'package:movie_app_view_layer/data/models/movie_model_impl.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
+import 'package:movie_app_view_layer/data/vos/payment_vo.dart';
+import 'package:movie_app_view_layer/network/requests/check_out_request.dart';
 import 'package:movie_app_view_layer/pages/confirmation_page.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
 import 'package:movie_app_view_layer/resources/strings.dart';
@@ -7,8 +12,30 @@ import 'package:movie_app_view_layer/resources/strings.dart';
 import '../resources/colors.dart';
 import '../widgets/checkout_title.dart';
 
-class PaymentPage extends StatelessWidget {
-  const PaymentPage({Key? key}) : super(key: key);
+class PaymentPage extends StatefulWidget {
+  const PaymentPage({Key? key, this.checkOutData}) : super(key: key);
+
+  final CheckOutDataVO? checkOutData;
+
+  @override
+  State<PaymentPage> createState() => _PaymentPageState();
+}
+
+class _PaymentPageState extends State<PaymentPage> {
+  MovieModel mMovieModel = MovieModelImpl();
+
+  List<PaymentVO>? mPyament;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    mMovieModel.getPaymentType().then((pList) {
+      mPyament = pList;
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,85 +78,61 @@ class PaymentPage extends StatelessWidget {
                 const SizedBox(
                   height: MARGIN_MEDIUM_3,
                 ),
-                PaymentView(
-                  text: UPI_TEXT,
-                  icon: Image.asset('assets/icons/upi_icon.png'),
-                  onTapPayment: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const ConfirmationPage()));
-                  },
-                ),
-                const SizedBox(
-                  height: MARGIN_CARD_MEDIUM,
-                ),
-                PaymentView(
-                  text: GIFT_VOUCHER_TECT,
-                  icon: Image.asset(
-                    'assets/icons/gift_icon.png',
-                    color: Colors.white,
-                  ),
-                  onTapPayment: () {},
-                ),
-                const SizedBox(
-                  height: MARGIN_CARD_MEDIUM,
-                ),
-                PaymentView(
-                  text: QUICK_PAY_TEXT,
-                  icon: Image.asset('assets/icons/pay_icon.png'),
-                  onTapPayment: () {},
-                ),
-                const SizedBox(
-                  height: MARGIN_CARD_MEDIUM,
-                ),
-                PaymentView(
-                  text: CREDIT_AND_DEBIT_TEXT,
-                  icon: Image.asset(
-                    'assets/icons/card_icon.png',
-                    color: Colors.white,
-                  ),
-                  onTapPayment: () {},
-                ),
-                const SizedBox(
-                  height: MARGIN_CARD_MEDIUM,
-                ),
-                PaymentView(
-                  text: REDEEM_POINT_TEXT,
-                  icon: Image.asset(
-                    'assets/icons/redeem_point_icon.png',
-                    color: Colors.white,
-                  ),
-                  onTapPayment: () {},
-                ),
-                const SizedBox(
-                  height: MARGIN_CARD_MEDIUM,
-                ),
-                PaymentView(
-                  text: MOBILE_WALLET_TEXT,
-                  icon: Image.asset(
-                    'assets/icons/m_wallet_icon.png',
-                    color: Colors.white,
-                  ),
-                  onTapPayment: () {},
-                ),
-                const SizedBox(
-                  height: MARGIN_CARD_MEDIUM,
-                ),
-                PaymentView(
-                  text: NET_BANKING_TEXT,
-                  icon: Image.asset(
-                    'assets/icons/net_banking_icon.png',
-                    color: Colors.white,
-                  ),
-                  onTapPayment: () {},
-                ),
+                mPyament == null
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: mPyament?.length ?? 0,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final p = mPyament?[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: MARGIN_CARD_MEDIUM,
+                            ),
+                            child: PaymentView(
+                              text: '${p?.title}',
+                              icon: Image.network('${p?.icon}'),
+                              onTapPayment: () {
+                                _checkOut(context, p);
+                              },
+                            ),
+                          );
+                        },
+                      ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  _checkOut(BuildContext context, PaymentVO? payment) {
+    final checkOutRequest = CheckOutRequest(
+      seatNumber: 'N-8',
+      bookingDate: DateTime.now().toString(),
+      cinemaDayTimeSlotId: widget.checkOutData?.mCinema?.timeSlot?.id,
+      movieId: widget.checkOutData?.mMovie?.id,
+      paymentTypeId: payment?.id,
+      stacks: widget.checkOutData?.mSnacks?.snackList,
+    );
+
+    mMovieModel.checkOut(checkOutRequest).then((checkOut) {
+      if (checkOut.code == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ConfirmationPage(
+              checkOut: checkOut.data,
+              checkOutData: widget.checkOutData,
+            ),
+          ),
+        );
+      }
+    });
   }
 }
 

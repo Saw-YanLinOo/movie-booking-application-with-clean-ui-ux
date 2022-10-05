@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_vo.dart';
+import 'package:movie_app_view_layer/network/api_constants.dart';
 
 import '../resources/colors.dart';
 import '../resources/dimens.dart';
@@ -8,10 +11,14 @@ import 'date_item_view.dart';
 
 class TicketView extends StatelessWidget {
   final Function? onTapTicket;
+  final CheckOutVO? checkOut;
+  final CheckOutDataVO? checkOutData;
 
   const TicketView({
     Key? key,
     this.onTapTicket,
+    this.checkOut,
+    this.checkOutData,
   }) : super(key: key);
 
   @override
@@ -48,8 +55,8 @@ class TicketView extends StatelessWidget {
                   SizedBox(
                     width: 95,
                     height: 120,
-                    child: Image.asset(
-                      'assets/images/movie_item.png',
+                    child: Image.network(
+                      '$IMAGE_BASE_URL${checkOutData?.mMovie?.posterPath}',
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -60,7 +67,8 @@ class TicketView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Black Widow (3D) (U/A)',
+                            '${checkOutData?.mMovie?.title}',
+                            // 'Black Widow (3D) (U/A)',
                             style: GoogleFonts.dmSans(
                                 fontSize: TEXT_REGULAR_2X,
                                 fontWeight: FontWeight.w500,
@@ -70,7 +78,8 @@ class TicketView extends StatelessWidget {
                             height: MARGIN_CARD_MEDIUM_2,
                           ),
                           Text(
-                            'JCGV : Junction City',
+                            '${checkOutData?.mCinema?.name}',
+                            // 'JCGV : Junction City',
                             style: GoogleFonts.dmSans(
                               fontSize: TEXT_REGULAR_2X,
                               fontWeight: FontWeight.w400,
@@ -86,7 +95,8 @@ class TicketView extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                'Gold-G8,G7',
+                                '${checkOut?.seat}',
+                                //'Gold-G8,G7',
                                 style: GoogleFonts.dmSans(
                                   fontSize: TEXT_REGULAR_2X,
                                   fontWeight: FontWeight.w700,
@@ -94,7 +104,8 @@ class TicketView extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '(SCREEN2)',
+                                '(SCREEN ${checkOutData?.mCinema?.timeSlot?.status})',
+                                //'(SCREEN2)',
                                 style: GoogleFonts.dmSans(
                                   fontSize: TEXT_REGULAR,
                                   color: Colors.grey,

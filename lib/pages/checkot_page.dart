@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
 import 'package:movie_app_view_layer/pages/payment_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
 import 'package:movie_app_view_layer/resources/strings.dart';
 import 'package:movie_app_view_layer/widgets/booking_button_view.dart';
 
-import '../view_items/check_out_ticket_view.dart';
+import '../viewitems/check_out_ticket_view.dart';
 import '../widgets/checkout_title.dart';
 
 class CheckOutPage extends StatelessWidget {
-  const CheckOutPage({Key? key}) : super(key: key);
+  const CheckOutPage({Key? key, this.checkOutData}) : super(key: key);
 
+  final CheckOutDataVO? checkOutData;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,8 +20,13 @@ class CheckOutPage extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: BACKGROUND_COLOR,
-        leading: const Icon(
-          Icons.arrow_back_ios,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_ios,
+          ),
         ),
         centerTitle: true,
         title: const CheckOutTitle(title: CHECKOUT_TEXT),
@@ -30,7 +37,7 @@ class CheckOutPage extends StatelessWidget {
             margin: const EdgeInsets.symmetric(
               horizontal: MARGIN_MEDIUM_3,
             ),
-            child: const CheckOutTicketView(),
+            child: CheckOutTicketView(checkOutData: checkOutData),
           ),
           const SizedBox(
             height: MARGIN_XL_LARGE,
@@ -41,12 +48,12 @@ class CheckOutPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const PaymentPage(),
+                  builder: (_) => PaymentPage(checkOutData: checkOutData),
                 ),
               );
             },
           ),
-          SizedBox(
+          const SizedBox(
             height: MARGIN_CARD_MEDIUM,
           ),
         ],

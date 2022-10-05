@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/models/movie_model.dart';
+import 'package:movie_app_view_layer/data/models/movie_model_impl.dart';
+import 'package:movie_app_view_layer/data/vos/city_vo.dart';
 import 'package:movie_app_view_layer/main.dart';
-import 'package:movie_app_view_layer/pages/movie_page.dart';
+import 'package:movie_app_view_layer/pages/home_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
 
-class LocationPage extends StatelessWidget {
+class LocationPage extends StatefulWidget {
   const LocationPage({Key? key}) : super(key: key);
+
+  @override
+  State<LocationPage> createState() => _LocationPageState();
+}
+
+class _LocationPageState extends State<LocationPage> {
+  MovieModel mMovieModel = MovieModelImpl();
+
+  List<CityVO>? mCityList;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    mMovieModel.getCity().then((citys) {
+      mCityList = citys;
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +65,7 @@ class LocationPage extends StatelessWidget {
               },
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: MARGIN_MEDIUM,
           ),
           Align(
@@ -64,28 +87,70 @@ class LocationPage extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return const ListTile(
-                  title: Text(
-                    'Yangon',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+            child: mCityList == null
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : CityListView(
+                    mCityList: mCityList,
+                    onPressedMovie: (cityId) {
+                      _onPressedCity(context, cityId);
+                    },
                   ),
-                );
-              },
-              itemCount: 7,
-              separatorBuilder: (BuildContext context, int index) {
-                return Divider(
-                  color: Colors.grey,
-                );
-              },
-            ),
           ),
         ],
       ),
+    );
+  }
+
+  _onPressedCity(BuildContext context, int cityId) {
+    mMovieModel.setCity(cityId.toString()).then((value) {
+      if (value.code == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const HomePage(),
+          ),
+        );
+      }
+    });
+  }
+}
+
+class CityListView extends StatelessWidget {
+  const CityListView({
+    Key? key,
+    required this.mCityList,
+    required this.onPressedMovie,
+  }) : super(key: key);
+
+  final List<CityVO>? mCityList;
+  final Function(int) onPressedMovie;
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        var city = mCityList?[index];
+
+        return ListTile(
+          onTap: () {
+            onPressedMovie(city?.id ?? 0);
+          },
+          title: Text(
+            city?.name ?? '',
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
+      itemCount: mCityList?.length ?? 0,
+      separatorBuilder: (BuildContext context, int index) {
+        return const Divider(
+          color: Colors.grey,
+        );
+      },
     );
   }
 }

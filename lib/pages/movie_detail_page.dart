@@ -1,112 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/models/movie_model.dart';
+import 'package:movie_app_view_layer/data/models/movie_model_impl.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
+import 'package:movie_app_view_layer/data/vos/credit_vo.dart';
+import 'package:movie_app_view_layer/data/vos/movie_vo.dart';
+import 'package:movie_app_view_layer/network/api_constants.dart';
 import 'package:movie_app_view_layer/pages/choose_cinema_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/widgets/movie_title.dart';
 
 import '../resources/dimens.dart';
 import '../resources/strings.dart';
-import '../view_items/actor_view.dart';
+import '../viewitems/actor_view.dart';
 import '../widgets/booking_button_view.dart';
 
-class MovieDetailPage extends StatelessWidget {
-  const MovieDetailPage({Key? key, required this.movie}) : super(key: key);
+class MovieDetailPage extends StatefulWidget {
+  const MovieDetailPage({
+    Key? key,
+    this.index,
+    required this.movie,
+  }) : super(key: key);
 
-  final Map<String, dynamic> movie;
+  final int? index;
+  final MovieVO movie;
+
+  @override
+  State<MovieDetailPage> createState() => _MovieDetailPageState();
+}
+
+class _MovieDetailPageState extends State<MovieDetailPage> {
+  MovieModel mMovieModel = MovieModelImpl();
+
+  MovieVO? mMovie;
+  List<CreditVO>? mMovieCredit;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    mMovieModel.getMovieDetail('${widget.movie.id}').then((movie) {
+      mMovie = movie;
+      setState(() {});
+    });
+
+    mMovieModel.getCreditsByMovie('${widget.movie.id}').then((creditList) {
+      mMovieCredit = creditList;
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    const movieTypeList = [
-      'Action',
-      'New',
-      'Drama',
-      'Adventure',
-      'Animation',
-    ];
-
     return Scaffold(
       backgroundColor: BACKGROUND_COLOR,
       body: SafeArea(
-        child: Stack(
-          children: [
-            ListView(
-              children: [
-                MovieDetailAppBarView(),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: MARGIN_MEDIUM_2,
-                  ),
-                  child: MovieDetailView(movieTypeList: movieTypeList),
-                ),
-                SizedBox(
-                  height: MARGIN_MEDIUM,
-                ),
-                Padding(
-                  padding: EdgeInsets.all(MARGIN_MEDIUM_3),
-                  child: MovieCRDView(),
-                ),
-                SizedBox(
-                  height: MARGIN_MEDIUM,
-                ),
-                Visibility(
-                  visible: movie['showingDate'] == null ? false : true,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MARGIN_MEDIUM_2,
-                    ),
-                    child: NotiReleaseSection(),
-                  ),
-                ),
-                SizedBox(
-                  height: MARGIN_MEDIUM_2,
-                ),
-                StoryView(),
-                SizedBox(
-                  height: MARGIN_XL_LARGE,
-                ),
-                CastView(),
-                SizedBox(
-                  height: MARGIN_XXXXL_LARGE,
-                ),
-              ],
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: MARGIN_XXL_LARGE,
-                  vertical: MARGIN_LARGE,
-                ),
-                child: BookingButtonView(
-                  title: 'Booking',
-                  onTapBooking: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChooseCinema(),
+        child: mMovie == null
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : Stack(
+                children: [
+                  ListView(
+                    children: [
+                      MovieDetailAppBarView(
+                          backDropImage: mMovie?.backDropPath),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: MARGIN_MEDIUM_2,
+                        ),
+                        child: MovieDetailSection(mMovie: mMovie),
                       ),
-                    );
-                  },
-                ),
+                      const SizedBox(
+                        height: MARGIN_MEDIUM,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(MARGIN_MEDIUM_3),
+                        child: MovieCRDView(mMovie: mMovie),
+                      ),
+                      const SizedBox(
+                        height: MARGIN_MEDIUM,
+                      ),
+                      Visibility(
+                        visible: widget.index == 0 ? false : true,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: MARGIN_MEDIUM_2,
+                          ),
+                          child: NotiReleaseSection(
+                            releaseDate: mMovie?.releaseDate,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: MARGIN_MEDIUM_2,
+                      ),
+                      StoryView(
+                        stroyLine: mMovie?.overview,
+                      ),
+                      const SizedBox(
+                        height: MARGIN_XL_LARGE,
+                      ),
+                      CastView(
+                        mMovieCredit: mMovieCredit,
+                      ),
+                      const SizedBox(
+                        height: MARGIN_XXXXL_LARGE,
+                      ),
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: MARGIN_XXL_LARGE,
+                        vertical: MARGIN_LARGE,
+                      ),
+                      child: BookingButtonView(
+                        title: 'Booking',
+                        onTapBooking: () {
+                          final mCheckOutData = CheckOutDataVO(mMovie: mMovie);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ChooseCinema(checkOutData: mCheckOutData),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: MARGIN_XL_LARGE,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: MARGIN_XL_LARGE,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black,
-                      ]),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -115,8 +158,10 @@ class MovieDetailPage extends StatelessWidget {
 class NotiReleaseSection extends StatelessWidget {
   const NotiReleaseSection({
     Key? key,
+    this.releaseDate,
   }) : super(key: key);
 
+  final DateTime? releaseDate;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -144,14 +189,14 @@ class NotiReleaseSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Releasing in 5 day',
+                  'Releasing in ${releaseDate?.day} days',
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: TEXT_REGULAR_2X,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: MARGIN_CARD_MEDIUM,
                 ),
                 Text(
@@ -162,7 +207,7 @@ class NotiReleaseSection extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: MARGIN_MEDIUM_3,
                 ),
                 TextButton.icon(
@@ -171,11 +216,11 @@ class NotiReleaseSection extends StatelessWidget {
                     backgroundColor: PRIMARY_COLOR,
                     padding: const EdgeInsets.all(MARGIN_MEDIUM),
                   ),
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.notifications_active,
                     color: Colors.black,
                   ),
-                  label: Text(
+                  label: const Text(
                     MOVIE_DETAIL_BOOKING_TEXT,
                     style: TextStyle(
                       color: Colors.black,
@@ -199,48 +244,58 @@ class NotiReleaseSection extends StatelessWidget {
 class CastView extends StatelessWidget {
   const CastView({
     Key? key,
+    this.mMovieCredit,
   }) : super(key: key);
+
+  final List<CreditVO>? mMovieCredit;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: MARGIN_MEDIUM_2),
-          child: MovieTitle(
-            title: MOVIE_DETAIL_CAST_TEXT,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(
-          height: MARGIN_XL_LARGE,
-        ),
-        SizedBox(
-          height: MOVIE_DETAIL_ACTOR_LISTVIEW_HEIGHT,
-          child: ListView.builder(
-            itemCount: 10,
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: MARGIN_MEDIUM_3),
-            itemBuilder: ((context, index) {
-              return Container(
-                width: MOVIE_DETAIL_ACTOR_VIEW_WIDTH,
-                margin: const EdgeInsets.only(right: MARGIN_MEDIUM_3),
-                child: const ActorView(),
-              );
-            }),
-          ),
-        ),
-      ],
-    );
+    return mMovieCredit == null
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(left: MARGIN_MEDIUM_2),
+                child: MovieTitle(
+                  title: MOVIE_DETAIL_CAST_TEXT,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(
+                height: MARGIN_XL_LARGE,
+              ),
+              SizedBox(
+                height: MOVIE_DETAIL_ACTOR_LISTVIEW_HEIGHT,
+                child: ListView.builder(
+                  itemCount: mMovieCredit?.length ?? 0,
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: MARGIN_MEDIUM_3),
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: MOVIE_DETAIL_ACTOR_VIEW_WIDTH,
+                      margin: const EdgeInsets.only(right: MARGIN_MEDIUM_3),
+                      child: ActorView(creditVO: mMovieCredit?[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
   }
 }
 
 class StoryView extends StatelessWidget {
   const StoryView({
     Key? key,
+    this.stroyLine,
   }) : super(key: key);
+
+  final String? stroyLine;
 
   @override
   Widget build(BuildContext context) {
@@ -257,11 +312,10 @@ class StoryView extends StatelessWidget {
         const SizedBox(
           height: MARGIN_MEDIUM,
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: MARGIN_MEDIUM_2),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: MARGIN_MEDIUM_2),
           child: MovieTitle(
-            title:
-                'In the 1970s, young Gru tries to join a group of supervillains called the Vicious 6 after they oust their leader -- the legendary fighter Wild Knuckles. When the interview turns disastrous, Gru and his Minions go on the run with the Vicious 6 hot on their tails. Luckily, he finds an unlikely source for guidance -- Wild Knuckles himself -- and soon discovers that even bad guys need a little help from their friends.',
+            title: '$stroyLine',
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -273,7 +327,10 @@ class StoryView extends StatelessWidget {
 class MovieCRDView extends StatelessWidget {
   const MovieCRDView({
     Key? key,
+    this.mMovie,
   }) : super(key: key);
+
+  final MovieVO? mMovie;
 
   @override
   Widget build(BuildContext context) {
@@ -284,13 +341,14 @@ class MovieCRDView extends StatelessWidget {
           title: 'Censor Rating',
           description: 'U/A',
         ),
-        const MovieCRDItem(
+        MovieCRDItem(
           title: 'Release Date',
-          description: 'May 8th, 2022',
+          description:
+              '${mMovie?.releaseDate?.month} - ${mMovie?.releaseDate?.day} - ${mMovie?.releaseDate?.year}',
         ),
-        const MovieCRDItem(
+        MovieCRDItem(
           title: 'Duration',
-          description: '2h 15min',
+          description: '${mMovie?.runtime} mins',
         ),
       ],
     );
@@ -357,13 +415,13 @@ class MovieCRDItem extends StatelessWidget {
   }
 }
 
-class MovieDetailView extends StatelessWidget {
-  const MovieDetailView({
+class MovieDetailSection extends StatelessWidget {
+  const MovieDetailSection({
     Key? key,
-    required this.movieTypeList,
+    required this.mMovie,
   }) : super(key: key);
 
-  final List<String> movieTypeList;
+  final MovieVO? mMovie;
 
   @override
   Widget build(BuildContext context) {
@@ -378,8 +436,8 @@ class MovieDetailView extends StatelessWidget {
             children: [
               Positioned.fill(
                 top: -MARGIN_LARGE,
-                child: Image.asset(
-                  'assets/images/movie_item.png',
+                child: Image.network(
+                  '$IMAGE_BASE_URL${mMovie?.posterPath}',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -394,21 +452,22 @@ class MovieDetailView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const MovieTitleView(),
+                MovieTitleView(
+                  mMovie: mMovie,
+                ),
                 const SizedBox(
                   height: MARGIN_MEDIUM_2,
                 ),
-                const MovieTitle(
-                  title: '2D, 3D, 3D IMAX, 3D DBOX 2D, 3D',
+                MovieTitle(
+                  title: '2D, 3D, 3D IMAX',
                   fontWeight: FontWeight.w600,
                 ),
                 Wrap(
                   spacing: MARGIN_MEDIUM,
-                  children: movieTypeList
-                      .map(
-                        (e) => GenreChipView(e),
-                      )
-                      .toList(),
+                  children: mMovie?.genres
+                          ?.map((genre) => GenreChipView(genre.name ?? ''))
+                          .toList() ??
+                      [],
                 ),
               ],
             ),
@@ -476,15 +535,20 @@ class GeneralChipView extends StatelessWidget {
 class MovieTitleView extends StatelessWidget {
   const MovieTitleView({
     Key? key,
+    this.mMovie,
   }) : super(key: key);
 
+  final MovieVO? mMovie;
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const MovieTitle(
-          title: 'Venom',
-          fontWeight: FontWeight.w700,
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.25,
+          child: MovieTitle(
+            title: mMovie?.title ?? '',
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(
           width: MARGIN_MEDIUM,
@@ -493,9 +557,9 @@ class MovieTitleView extends StatelessWidget {
           'assets/images/imdb.png',
         ),
         Text(
-          '7.1',
+          '${mMovie?.voteAverage ?? 0.0}',
           style: GoogleFonts.inter(
-            fontSize: MARGIN_MEDIUM_2,
+            fontSize: TEXT_REGULAR,
             color: Colors.white,
             fontStyle: FontStyle.italic,
           ),
@@ -506,7 +570,9 @@ class MovieTitleView extends StatelessWidget {
 }
 
 class MovieDetailAppBarView extends StatelessWidget {
-  const MovieDetailAppBarView({Key? key}) : super(key: key);
+  const MovieDetailAppBarView({Key? key, this.backDropImage}) : super(key: key);
+
+  final String? backDropImage;
 
   @override
   Widget build(BuildContext context) {
@@ -515,8 +581,8 @@ class MovieDetailAppBarView extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/movie_item.png',
+            child: Image.network(
+              '$IMAGE_BASE_URL$backDropImage',
               fit: BoxFit.cover,
             ),
           ),

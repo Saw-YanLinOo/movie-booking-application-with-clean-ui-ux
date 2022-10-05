@@ -1,24 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/models/movie_model.dart';
+import 'package:movie_app_view_layer/data/models/movie_model_impl.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
+import 'package:movie_app_view_layer/data/vos/snack_category_vo.dart';
+import 'package:movie_app_view_layer/data/vos/snack_operation_vo.dart';
+import 'package:movie_app_view_layer/data/vos/snack_vo.dart';
 import 'package:movie_app_view_layer/pages/checkot_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
 
+import '../data/vos/cinema_vo.dart';
 import '../resources/strings.dart';
-import '../view_items/food_view.dart';
+import '../viewitems/food_view.dart';
 
-class FoodPage extends StatelessWidget {
-  const FoodPage({Key? key}) : super(key: key);
+class FoodPage extends StatefulWidget {
+  const FoodPage({Key? key, this.mCinema, this.checkOutData}) : super(key: key);
+  final CheckOutDataVO? checkOutData;
+  final CinemaVO? mCinema;
+  @override
+  State<FoodPage> createState() => _FoodPageState();
+}
+
+class _FoodPageState extends State<FoodPage> {
+  MovieModel mMovieModel = MovieModelImpl();
+
+  List<SnackCategoryVO>? snackCategoryList;
+  List<SnackVO>? snackList;
+  SnackOperationVO oSnack = SnackOperationVO();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    mMovieModel.getSnackCategory().then((categoryList) {
+      snackCategoryList = categoryList;
+      snackCategoryList?.insert(0, SnackCategoryVO(title: 'All'));
+      setState(() {});
+    });
+    _getSnack('');
+  }
+
+  _getSnack(String categoryId) {
+    snackList = null;
+    setState(() {});
+    mMovieModel.getSnack(categoryId).then((snacks) {
+      snackList = snacks;
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    const foodList = [
-      'All',
-      'Combo',
-      'Snack',
-      'Pop Corn',
-      'Beverge',
-    ];
     return Scaffold(
       backgroundColor: BACKGROUND_COLOR,
       appBar: AppBar(
@@ -52,134 +85,198 @@ class FoodPage extends StatelessWidget {
           ),
         ],
       ),
-      body: DefaultTabController(
-        length: foodList.length,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: MARGIN_MEDIUM_2,
-              ),
-              child: FoodTitleSectionView(foodList: foodList),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: MARGIN_LARGE,
-                  right: MARGIN_LARGE,
-                  top: MARGIN_XL_LARGE,
+      body: snackCategoryList == null
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: MARGIN_MEDIUM_2,
+                  ),
+                  child: FoodTitleSectionView(
+                    onTapCategory: (value) {
+                      _getSnack(value.toString());
+                    },
+                    categoryList: snackCategoryList,
+                  ),
                 ),
-                child: FoodGridSectionView(foodList: foodList),
-              ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: MARGIN_LARGE,
+                      right: MARGIN_LARGE,
+                      top: MARGIN_XL_LARGE,
+                    ),
+                    child: FoodGridSectionView(
+                      foodList: snackList,
+                      onTapAdd: (snack) {
+                        oSnack.addSnack(snack);
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
       persistentFooterButtons: [
         TotalSectionView(
           onTapToOpen: () {
-            _showModelButtonSheet(context);
+            _showModelButtonSheet(context, oSnack);
           },
           toCheckOut: () {
+            widget.checkOutData?.mSnacks = oSnack;
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => CheckOutPage(),
+                builder: (_) => CheckOutPage(checkOutData: widget.checkOutData),
               ),
             );
           },
+          totalPrice: oSnack.totalPrice,
         ),
       ],
     );
   }
 
-  _showModelButtonSheet(BuildContext context) {
-    showModalBottomSheet(
-        context: context,
-        backgroundColor: BACKGROUND_COLOR,
-        builder: (context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: 4,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: MARGIN_MEDIUM_2, vertical: MARGIN_MEDIUM),
-                  itemBuilder: (context, index) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Large Cola',
-                          style: GoogleFonts.inter(
-                              fontSize: TEXT_REGULAR_2X,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.add_circle,
-                              color: PRIMARY_COLOR,
-                            ),
-                            SizedBox(
-                              width: MARGIN_MEDIUM,
-                            ),
-                            Text(
-                              '1',
-                              style: GoogleFonts.inter(
-                                  fontSize: TEXT_REGULAR_2X,
-                                  fontWeight: FontWeight.w700,
-                                  color: PRIMARY_COLOR),
-                            ),
-                            SizedBox(
-                              width: MARGIN_MEDIUM,
-                            ),
-                            Icon(
-                              Icons.do_disturb_on,
-                              color: PRIMARY_COLOR,
-                            ),
-                          ],
-                        ),
-                        Text(
-                          '1000 KS',
-                          style: GoogleFonts.inter(
-                              fontSize: TEXT_REGULAR_2X,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white),
-                        ),
-                      ],
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const SizedBox(
-                      height: MARGIN_CARD_MEDIUM,
-                    );
-                  },
-                ),
-              ),
-              TotalSectionView(
-                onTapToOpen: () {
-                  Navigator.pop(context);
-                },
-                toCheckOut: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CheckOutPage(),
+  _showModelButtonSheet(BuildContext context, SnackOperationVO oSnack) async {
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: BACKGROUND_COLOR,
+      builder: (context) {
+        return FoodButtonSheetView(
+          oSnack: oSnack,
+          checkOutData: widget.checkOutData,
+        );
+      },
+    );
+
+    setState(() {});
+  }
+}
+
+class FoodButtonSheetView extends StatefulWidget {
+  const FoodButtonSheetView({
+    required this.oSnack,
+    this.checkOutData,
+    Key? key,
+  }) : super(key: key);
+
+  final SnackOperationVO oSnack;
+  final CheckOutDataVO? checkOutData;
+  @override
+  State<FoodButtonSheetView> createState() => _FoodButtonSheetViewState();
+}
+
+class _FoodButtonSheetViewState extends State<FoodButtonSheetView> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: widget.oSnack.snackList.length,
+            padding: const EdgeInsets.symmetric(
+                horizontal: MARGIN_MEDIUM_2, vertical: MARGIN_MEDIUM),
+            itemBuilder: (context, index) {
+              var snack = widget.oSnack.snackList[index];
+              var qty = snack.quantity ?? 0;
+              var subPrice = snack.price ?? 0;
+              var subTotal = qty * subPrice;
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: Text(
+                      '${snack.name}',
+                      style: GoogleFonts.inter(
+                        fontSize: TEXT_REGULAR_2X,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.arrow_drop_up_rounded,
-                ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          widget.oSnack.addSnack(snack);
+                          setState(() {});
+                        },
+                        child: Icon(
+                          Icons.add_circle,
+                          color: PRIMARY_COLOR,
+                        ),
+                      ),
+                      SizedBox(
+                        width: MARGIN_MEDIUM,
+                      ),
+                      Text(
+                        '${snack.quantity}',
+                        style: GoogleFonts.inter(
+                            fontSize: TEXT_REGULAR_2X,
+                            fontWeight: FontWeight.w700,
+                            color: PRIMARY_COLOR),
+                      ),
+                      SizedBox(
+                        width: MARGIN_MEDIUM,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          widget.oSnack.reduceSnack(snack);
+                          setState(() {});
+                        },
+                        child: Icon(
+                          Icons.do_disturb_on,
+                          color: PRIMARY_COLOR,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '$subTotal KS',
+                    style: GoogleFonts.inter(
+                      fontSize: TEXT_REGULAR_2X,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              return const SizedBox(
+                height: MARGIN_CARD_MEDIUM,
+              );
+            },
+          ),
+        ),
+        TotalSectionView(
+          onTapToOpen: () {
+            Navigator.pop(context);
+          },
+          toCheckOut: () {
+            widget.checkOutData?.mSnacks = widget.oSnack;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CheckOutPage(checkOutData: widget.checkOutData),
               ),
-            ],
-          );
-        });
+            );
+          },
+          icon: const Icon(
+            Icons.arrow_drop_up_rounded,
+          ),
+          totalPrice: widget.oSnack.totalPrice,
+        ),
+      ],
+    );
   }
 }
 
@@ -187,11 +284,12 @@ class TotalSectionView extends StatelessWidget {
   final Function toCheckOut;
   final Function onTapToOpen;
   final Icon? icon;
-
+  final int? totalPrice;
   const TotalSectionView({
     required this.toCheckOut,
     required this.onTapToOpen,
     this.icon,
+    this.totalPrice,
     Key? key,
   }) : super(key: key);
 
@@ -248,7 +346,7 @@ class TotalSectionView extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    '2000 KS',
+                    '$totalPrice KS',
                     style: GoogleFonts.inter(
                       fontSize: TEXT_REGULAR_2X,
                       fontWeight: FontWeight.w700,
@@ -274,56 +372,75 @@ class TotalSectionView extends StatelessWidget {
 class FoodGridSectionView extends StatelessWidget {
   const FoodGridSectionView({
     Key? key,
-    required this.foodList,
+    this.foodList,
+    required this.onTapAdd,
   }) : super(key: key);
 
-  final List<String> foodList;
-
+  final List<SnackVO>? foodList;
+  final Function(SnackVO) onTapAdd;
   @override
   Widget build(BuildContext context) {
-    return TabBarView(
-      children: foodList.map((e) {
-        return GridView.builder(
+    return foodList == null
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : GridView.builder(
             shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 2 / 3.1,
               mainAxisSpacing: MARGIN_LARGE,
               crossAxisSpacing: MARGIN_LARGE,
             ),
-            itemCount: 10,
-            itemBuilder: (context, invex) {
-              return FoodView();
-            });
-      }).toList(),
-    );
+            itemCount: foodList?.length,
+            itemBuilder: (context, index) {
+              var snack = foodList?[index];
+              return FoodView(
+                snack: snack,
+                onTapAdd: () {
+                  onTapAdd(snack!);
+                },
+              );
+            },
+          );
   }
 }
 
 class FoodTitleSectionView extends StatelessWidget {
   const FoodTitleSectionView({
     Key? key,
-    required this.foodList,
+    this.categoryList,
+    required this.onTapCategory,
   }) : super(key: key);
 
-  final List<String> foodList;
+  final List<SnackCategoryVO>? categoryList;
+  final Function(int) onTapCategory;
 
   @override
   Widget build(BuildContext context) {
-    return TabBar(
-      isScrollable: true,
-      indicatorColor: PRIMARY_COLOR,
-      tabs: foodList
-          .map((e) => Tab(
-                child: Text(
-                  e,
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: MARGIN_MEDIUM_2,
+    return DefaultTabController(
+      length: categoryList?.length ?? 0,
+      child: TabBar(
+        onTap: (value) {
+          onTapCategory(value);
+        },
+        isScrollable: true,
+        indicatorColor: PRIMARY_COLOR,
+        tabs: categoryList
+                ?.map(
+                  (c) => Tab(
+                    child: Text(
+                      '${c.title}',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: MARGIN_MEDIUM_2,
+                      ),
+                    ),
                   ),
-                ),
-              ))
-          .toList(),
+                )
+                .toList() ??
+            [],
+      ),
     );
   }
 }

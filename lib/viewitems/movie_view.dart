@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/vos/movie_vo.dart';
+import 'package:movie_app_view_layer/network/api_constants.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/strings.dart';
-
+import 'package:auto_size_text/auto_size_text.dart';
 import '../resources/dimens.dart';
 
 class MovieItemView extends StatelessWidget {
-  final Map<String, String> movie;
+  final int? index;
+  final MovieVO movie;
   final Function() onPressedMovie;
   const MovieItemView({
     Key? key,
+    this.index,
     required this.onPressedMovie,
     required this.movie,
   }) : super(key: key);
@@ -30,8 +34,9 @@ class MovieItemView extends StatelessWidget {
           children: [
             Expanded(
               child: MovieItemHeaderView(
-                image: movie['image'] ?? '',
-                date: movie['showingDate'],
+                index: index,
+                image: movie.posterPath ?? '',
+                date: movie.releaseDate,
               ),
             ),
             Padding(
@@ -50,26 +55,28 @@ class MovieItemView extends StatelessWidget {
 
 class MovieItemHeaderView extends StatelessWidget {
   const MovieItemHeaderView({
+    this.index,
     required this.image,
     this.date,
     Key? key,
   }) : super(key: key);
 
+  final int? index;
   final String image;
-  final String? date;
+  final DateTime? date;
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
       Positioned.fill(
-        child: Image.asset(
-          image,
+        child: Image.network(
+          '$IMAGE_BASE_URL$image',
           fit: BoxFit.cover,
         ),
       ),
       Align(
         alignment: Alignment.topRight,
         child: Visibility(
-          visible: date == null ? false : true,
+          visible: index == 0 ? false : true,
           child: Container(
             width: MediaQuery.of(context).size.width / 9,
             margin: const EdgeInsets.symmetric(
@@ -84,7 +91,7 @@ class MovieItemHeaderView extends StatelessWidget {
               color: PRIMARY_COLOR,
               borderRadius: BorderRadius.circular(MARGIN_MEDIUM),
             ),
-            child: Text(date ?? ''),
+            child: Text('${date?.day}'),
           ),
         ),
       ),
@@ -112,19 +119,23 @@ class MovieItemFooterView extends StatelessWidget {
     required this.movie,
   }) : super(key: key);
 
-  final Map<String, String> movie;
+  final MovieVO movie;
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Row(
           children: [
-            Text(
-              movie['title'] ?? '',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: MARGIN_CARD_MEDIUM_2,
-                fontWeight: FontWeight.w700,
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.2,
+              child: AutoSizeText(
+                movie.title ?? '',
+                maxLines: 1,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: MARGIN_CARD_MEDIUM_2,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const Spacer(),
@@ -134,7 +145,7 @@ class MovieItemFooterView extends StatelessWidget {
                   MOVIE_VIEW_IMDB_IAMGE,
                 ),
                 Text(
-                  movie['rating'] ?? "",
+                  '${movie.voteAverage ?? '0.0'}',
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: MARGIN_CARD_MEDIUM_2,
@@ -151,7 +162,7 @@ class MovieItemFooterView extends StatelessWidget {
         Row(
           children: [
             Text(
-              movie['countryType'] ?? '',
+              movie.originalLanguage ?? '',
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontSize: MARGIN_CARD_MEDIUM_2,
@@ -173,7 +184,7 @@ class MovieItemFooterView extends StatelessWidget {
               width: MARGIN_SMALL,
             ),
             Text(
-              movie['movieType'] ?? '',
+              '${movie.popularity ?? ''}',
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontSize: MARGIN_CARD_MEDIUM_2,

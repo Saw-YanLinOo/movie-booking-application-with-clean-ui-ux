@@ -5,7 +5,7 @@ import 'package:movie_app_view_layer/resources/strings.dart';
 
 import '../resources/colors.dart';
 import '../resources/dimens.dart';
-import '../view_items/check_out_ticket_view.dart';
+import '../viewitems/check_out_ticket_view.dart';
 
 class TicketDetailPage extends StatelessWidget {
   const TicketDetailPage({Key? key}) : super(key: key);

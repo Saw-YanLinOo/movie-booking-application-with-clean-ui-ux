@@ -179,8 +179,10 @@ class _SearchCinemaPageState extends State<SearchCinemaPage> {
           const SizedBox(
             height: MARGIN_MEDIUM_3,
           ),
-          const Expanded(
-            child: CinemaListViewSection(),
+          Expanded(
+            child: CinemaListViewSection(
+              onTapCinema: (cinema) {},
+            ),
           ),
         ],
       ),

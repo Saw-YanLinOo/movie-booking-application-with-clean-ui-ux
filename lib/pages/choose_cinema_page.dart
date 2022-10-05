@@ -1,16 +1,69 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
+import 'package:movie_app_view_layer/data/vos/cinema_and_time_slot_vo.dart';
+import 'package:movie_app_view_layer/data/vos/config_vo.dart';
 import 'package:movie_app_view_layer/pages/search_cinema_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
-import 'package:movie_app_view_layer/resources/strings.dart';
 
+import '../data/models/movie_model.dart';
+import '../data/models/movie_model_impl.dart';
+import '../data/vos/cinema_vo.dart';
 import '../resources/dimens.dart';
-import '../view_items/cinema_view.dart';
+import '../viewitems/cinema_view.dart';
 import '../widgets/location_text.dart';
 import 'choose_seat_page.dart';
 
-class ChooseCinema extends StatelessWidget {
-  const ChooseCinema({Key? key}) : super(key: key);
+class ChooseCinema extends StatefulWidget {
+  const ChooseCinema({Key? key, this.checkOutData}) : super(key: key);
+
+  final CheckOutDataVO? checkOutData;
+  @override
+  State<ChooseCinema> createState() => _ChooseCinemaState();
+}
+
+class _ChooseCinemaState extends State<ChooseCinema> {
+  MovieModel mMovieModel = MovieModelImpl();
+
+  late List<DateTime> times;
+  late List<ConfigVO>? configs;
+  late List<CinemaVO>? cinemaList;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    times = _generateTwoWeek();
+    configs = mMovieModel.configs;
+    _getCinema(DateTime.now());
+  }
+
+  _getCinema(DateTime time) {
+    cinemaList = null;
+    setState(() {});
+    mMovieModel.getCinema(time.toIso8601String()).then((cinemas) {
+      cinemaList = cinemas;
+      _getCinemaTimeSlot(time);
+      //setState(() {});
+    });
+  }
+
+  _getCinemaTimeSlot(DateTime time) {
+    mMovieModel
+        .getCinemaTimeSlot(time.toIso8601String())
+        .then((cinemaTimeSlots) {
+      var len = cinemaList?.length ?? 0;
+      for (var i = 0; i < len; i++) {
+        if (cinemaList?[i].id == cinemaTimeSlots?[i].id) {
+          cinemaList?[i].timeSlotList = cinemaTimeSlots?[i].timeSlots;
+        }
+      }
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +120,14 @@ class ChooseCinema extends StatelessWidget {
           const SizedBox(
             height: MARGIN_CARD_MEDIUM_2,
           ),
-          Container(
+          SizedBox(
             height: CHOOSE_CINEMA_LIST_DATE_CARD_HEIGHT,
-            child: const DateViewSection(),
+            child: DateViewSection(
+              times: times,
+              onTapDateCard: (time) {
+                _getCinema(time);
+              },
+            ),
           ),
           const SizedBox(
             height: MARGIN_LARGE,
@@ -88,38 +146,66 @@ class ChooseCinema extends StatelessWidget {
               horizontal: MARGIN_MEDIUM_2,
             ),
             color: AVAILABLE_BACKGROUND_COLOR,
-            child: const AvailiableView(),
+            child: AvailiableView(
+              config: configs?.where((config) => config.id == 2).first,
+            ),
           ),
-          const Expanded(
-            child: CinemaListViewSection(),
+          Expanded(
+            child: CinemaListViewSection(
+              cinemaList: cinemaList,
+              onTapCinema: (cinema) {
+                widget.checkOutData?.mCinema = cinema;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChooseSeatPage(
+                      checkOutData: widget.checkOutData,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
+
+  List<DateTime> _generateTwoWeek() {
+    List<DateTime> timeSloat = [];
+    var currentTime = DateTime.now();
+
+    for (int i = 0; i < 14; i++) {
+      timeSloat.add(currentTime.add(Duration(days: i)));
+    }
+
+    return timeSloat;
+  }
 }
 
 class AvailiableView extends StatelessWidget {
   const AvailiableView({
+    this.config,
     Key? key,
   }) : super(key: key);
 
+  final ConfigVO? config;
   @override
   Widget build(BuildContext context) {
+    List status = config?.value.toList();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const AvailiableItem(
-          color: PRIMARY_COLOR,
-          title: CINEMA_VIEW_AVAILABLE_TEXT,
-        ),
-        const AvailiableItem(
-          color: AVAILABLE_ITEM_COLOR_TWO,
-          title: CINEMA_VIEW_FILLING_FAST_TEXT,
-        ),
-        const AvailiableItem(
-          color: AVAILABLE_ITEM_COLOR_THREE,
-          title: CINEMA_VIEW_ALMOST_FULL_TEXT,
+        ...status.map(
+          (value) => AvailiableItem(
+            color: Color(
+              int.parse(
+                value['color'].toString().replaceRange(0, 1, '0xFF'),
+              ),
+            ),
+            title: value['title'],
+          ),
         ),
       ],
     );
@@ -128,26 +214,37 @@ class AvailiableView extends StatelessWidget {
 
 class CinemaListViewSection extends StatelessWidget {
   const CinemaListViewSection({
+    this.cinemaList,
+    required this.onTapCinema,
     Key? key,
   }) : super(key: key);
 
+  final List<CinemaVO>? cinemaList;
+  final Function(CinemaVO?) onTapCinema;
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      itemCount: 10,
-      itemBuilder: (context, index) {
-        return CinemaView(() {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ChooseSeatPage()),
+    return cinemaList == null
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : ListView.separated(
+            shrinkWrap: true,
+            itemCount: cinemaList?.length ?? 0,
+            itemBuilder: (context, index) {
+              var cinema = cinemaList?[index];
+              return CinemaView(
+                (timeSlot) {
+                  cinema?.timeSlot = timeSlot;
+                  onTapCinema(cinema);
+                },
+                cinema: cinema,
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) =>
+                const Divider(
+              color: Colors.grey,
+            ),
           );
-        });
-      },
-      separatorBuilder: (BuildContext context, int index) => const Divider(
-        color: Colors.grey,
-      ),
-    );
   }
 }
 
@@ -224,28 +321,35 @@ class ResulationView extends StatelessWidget {
 
 class DateViewSection extends StatefulWidget {
   const DateViewSection({
+    required this.times,
+    required this.onTapDateCard,
     Key? key,
   }) : super(key: key);
+
+  final List<DateTime> times;
+  final Function(DateTime) onTapDateCard;
 
   @override
   State<DateViewSection> createState() => _DateViewSectionState();
 }
 
 class _DateViewSectionState extends State<DateViewSection> {
-  int indexStack = -1;
+  int indexStack = 0;
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: 7,
+      itemCount: widget.times.length,
       shrinkWrap: true,
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(
         left: MARGIN_CARD_MEDIUM_2,
       ),
       itemBuilder: (context, index) {
+        var time = widget.times[index];
         return GestureDetector(
           onTap: () {
+            widget.onTapDateCard(time);
             setState(() {
               indexStack = index;
             });
@@ -265,7 +369,10 @@ class _DateViewSectionState extends State<DateViewSection> {
                   ),
                 ),
                 Positioned.fill(
-                  child: DateInfoView(index),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: DateInfoView(time),
+                  ),
                 ),
               ],
             ),
@@ -277,9 +384,9 @@ class _DateViewSectionState extends State<DateViewSection> {
 }
 
 class DateInfoView extends StatelessWidget {
-  final int index;
+  final DateTime time;
   const DateInfoView(
-    this.index, {
+    this.time, {
     Key? key,
   }) : super(key: key);
 
@@ -291,8 +398,19 @@ class DateInfoView extends StatelessWidget {
         const SizedBox(
           height: MARGIN_MEDIUM_2,
         ),
+        AutoSizeText(
+          Jiffy(time).EEEE,
+          maxLines: 1,
+          style: GoogleFonts.inter(
+            //fontSize: MARGIN_MEDIUM_2,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(
+          height: MARGIN_MEDIUM,
+        ),
         Text(
-          'Today',
+          Jiffy(time).MMM,
           style: GoogleFonts.inter(
             fontSize: MARGIN_MEDIUM_2,
             fontWeight: FontWeight.w700,
@@ -301,24 +419,27 @@ class DateInfoView extends StatelessWidget {
         const SizedBox(
           height: MARGIN_MEDIUM,
         ),
-        Text(
-          'May',
+        AutoSizeText(
+          checkTime(time),
+          maxLines: 1,
           style: GoogleFonts.inter(
-            fontSize: MARGIN_MEDIUM_2,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(
-          height: MARGIN_MEDIUM,
-        ),
-        Text(
-          '$index',
-          style: GoogleFonts.inter(
-            fontSize: MARGIN_MEDIUM_2,
             fontWeight: FontWeight.w700,
           ),
         ),
       ],
     );
+  }
+
+  String checkTime(DateTime time) {
+    var now = DateTime.now();
+    var tomorrow = now.add(const Duration(days: 1));
+
+    if (time.day == now.day) {
+      return 'Today';
+    } else if (time.day == tomorrow.day) {
+      return 'Tomorrow';
+    } else {
+      return Jiffy(time).E;
+    }
   }
 }

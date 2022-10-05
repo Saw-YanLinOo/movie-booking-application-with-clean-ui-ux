@@ -2,16 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:movie_app_view_layer/main.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_vo.dart';
+import 'package:movie_app_view_layer/pages/home_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
 
+import '../network/api_constants.dart';
 import '../resources/strings.dart';
-import '../view_items/ticket_view.dart';
+import '../viewitems/ticket_view.dart';
 
 class ConfirmationPage extends StatelessWidget {
-  const ConfirmationPage({Key? key}) : super(key: key);
+  const ConfirmationPage({
+    Key? key,
+    this.checkOut,
+    this.checkOutData,
+  }) : super(key: key);
 
+  final CheckOutVO? checkOut;
+  final CheckOutDataVO? checkOutData;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,11 +44,11 @@ class ConfirmationPage extends StatelessWidget {
             SizedBox(
               height: MARGIN_LARGE,
             ),
-            TicketView(),
+            TicketView(checkOut: checkOut, checkOutData: checkOutData),
             SizedBox(
               height: MARGIN_XXXL_LARGE,
             ),
-            QRCode(),
+            QRCode(qrCode: checkOut?.qrCode),
             SizedBox(
               height: MARGIN_XXXL_LARGE,
             ),
@@ -110,13 +119,15 @@ class ConfirmationPage extends StatelessWidget {
 class QRCode extends StatelessWidget {
   const QRCode({
     Key? key,
+    this.qrCode,
   }) : super(key: key);
 
+  final String? qrCode;
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Image.asset('assets/images/qr_code.png'),
+        Image.network('$QR_IMAGE_BASE_URL/${qrCode}'),
         SizedBox(
           height: MARGIN_CARD_MEDIUM_3,
         ),

@@ -1,54 +1,26 @@
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/vos/cinema_vo.dart';
+import 'package:movie_app_view_layer/data/vos/facilities_vo.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
+import 'package:chewie/chewie.dart';
+import 'package:video_player/video_player.dart';
+import 'package:flick_video_player/flick_video_player.dart';
 
-class CinemaDetail extends StatelessWidget {
-  const CinemaDetail({Key? key}) : super(key: key);
+class CinemaDetail extends StatefulWidget {
+  const CinemaDetail({Key? key, this.mCinema}) : super(key: key);
+
+  final CinemaVO? mCinema;
 
   @override
+  State<CinemaDetail> createState() => _CinemaDetailState();
+}
+
+class _CinemaDetailState extends State<CinemaDetail> {
+  @override
   Widget build(BuildContext context) {
-    final facilityList = [
-      {
-        "title": "Parking",
-        "icon": Image.asset(
-          'assets/icons/parking_icon.png',
-          color: PRIMARY_COLOR,
-        ),
-      },
-      {
-        "title": "Online Food",
-        "icon": Icon(
-          Icons.fastfood_outlined,
-          color: PRIMARY_COLOR,
-          size: MARGIN_MEDIUM_3,
-        ),
-      },
-      {
-        "title": "Wheel Chair",
-        "icon": Icon(
-          Icons.wheelchair_pickup,
-          color: PRIMARY_COLOR,
-          size: MARGIN_MEDIUM_3,
-        ),
-      },
-      {
-        "title": "Ticket Cancelation",
-        "icon": Image.asset(
-          'assets/icons/ticket_cancel_icon.png',
-        ),
-      }
-    ];
-    final safetyList = [
-      'Thermanal Scannig',
-      'Contactless Security Check',
-      'Santization Before Every Show',
-      'Disposable 3D glass',
-      'Contactless Food Serviec',
-      'Package Food',
-      'Deep Cleaning of rest room'
-    ];
     return Scaffold(
       backgroundColor: BACKGROUND_COLOR,
       appBar: AppBar(
@@ -74,7 +46,7 @@ class CinemaDetail extends StatelessWidget {
       ),
       body: CustomScrollView(
         slivers: [
-          const CinemaDetailImageSection(),
+          CinemaDetailImageSection(cinemaPoster: widget.mCinema?.promoVdoUrl),
           SliverList(
             delegate: SliverChildListDelegate([
               Padding(
@@ -83,7 +55,7 @@ class CinemaDetail extends StatelessWidget {
                   vertical: MARGIN_CARD_MEDIUM,
                 ),
                 child: Text(
-                  'JCGV : Junction City',
+                  '${widget.mCinema?.name}',
                   style: GoogleFonts.inter(
                     fontSize: TEXT_REGULAR_2X,
                     fontWeight: FontWeight.w600,
@@ -102,7 +74,8 @@ class CinemaDetail extends StatelessWidget {
                     SizedBox(
                       width: MediaQuery.of(context).size.width / 1.3,
                       child: Text(
-                        'Q5H3+JPP, Corner of, Bogyoke Lann, Yangon ',
+                        '${widget.mCinema?.address}',
+                        //'Q5H3+JPP, Corner of, Bogyoke Lann, Yangon ',
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -126,7 +99,8 @@ class CinemaDetail extends StatelessWidget {
                   horizontal: MARGIN_CARD_MEDIUM,
                   vertical: MARGIN_CARD_MEDIUM,
                 ),
-                child: const FacilitiesSectionView(),
+                child: FacilitiesSectionView(
+                    facilitiesList: widget.mCinema?.facilities),
               ),
               const SizedBox(
                 height: MARGIN_XL_LARGE,
@@ -136,7 +110,7 @@ class CinemaDetail extends StatelessWidget {
                   horizontal: MARGIN_CARD_MEDIUM,
                   vertical: MARGIN_CARD_MEDIUM,
                 ),
-                child: SafetySection(safetyList: safetyList),
+                child: SafetySection(safetyList: widget.mCinema?.safety),
               ),
             ]),
           ),
@@ -152,7 +126,7 @@ class SafetySection extends StatelessWidget {
     required this.safetyList,
   }) : super(key: key);
 
-  final List<String> safetyList;
+  final List<String>? safetyList;
 
   @override
   Widget build(BuildContext context) {
@@ -172,25 +146,26 @@ class SafetySection extends StatelessWidget {
         ),
         Wrap(
           children: safetyList
-              .map((e) => Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: MARGIN_MEDIUM,
-                      vertical: MARGIN_SMALL,
-                    ),
-                    padding: const EdgeInsets.all(MARGIN_SMALL),
-                    decoration: BoxDecoration(
-                      color: PRIMARY_COLOR,
-                      borderRadius: BorderRadius.circular(MARGIN_SMALL),
-                    ),
-                    child: Text(
-                      e,
-                      style: GoogleFonts.inter(
-                        fontSize: TEXT_REGULAR,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ))
-              .toList(),
+                  ?.map((e) => Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: MARGIN_MEDIUM,
+                          vertical: MARGIN_SMALL,
+                        ),
+                        padding: const EdgeInsets.all(MARGIN_SMALL),
+                        decoration: BoxDecoration(
+                          color: PRIMARY_COLOR,
+                          borderRadius: BorderRadius.circular(MARGIN_SMALL),
+                        ),
+                        child: Text(
+                          e,
+                          style: GoogleFonts.inter(
+                            fontSize: TEXT_REGULAR,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ))
+                  .toList() ??
+              [],
         ),
       ],
     );
@@ -199,9 +174,11 @@ class SafetySection extends StatelessWidget {
 
 class FacilitiesSectionView extends StatelessWidget {
   const FacilitiesSectionView({
+    this.facilitiesList,
     Key? key,
   }) : super(key: key);
 
+  final List<FacilitiesVO>? facilitiesList;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -221,35 +198,16 @@ class FacilitiesSectionView extends StatelessWidget {
         Wrap(
           spacing: MARGIN_MEDIUM,
           children: [
-            FacilitiesItemView(
-              icon: Image.asset(
-                'assets/icons/parking_icon.png',
-                color: PRIMARY_COLOR,
-              ),
-              title: "Parking",
-            ),
-            FacilitiesItemView(
-              icon: Icon(
-                Icons.fastfood_outlined,
-                color: PRIMARY_COLOR,
-                size: MARGIN_MEDIUM_3,
-              ),
-              title: "Online Food",
-            ),
-            FacilitiesItemView(
-              icon: Icon(
-                Icons.wheelchair_pickup,
-                color: PRIMARY_COLOR,
-                size: MARGIN_MEDIUM_3,
-              ),
-              title: "Wheel Chair",
-            ),
-            FacilitiesItemView(
-              icon: Image.asset(
-                'assets/icons/ticket_cancel_icon.png',
-              ),
-              title: "Ticket Cancelation",
-            ),
+            ...facilitiesList?.map(
+                  (f) => FacilitiesItemView(
+                    icon: Image.network(
+                      '${f.img}',
+                      color: PRIMARY_COLOR,
+                    ),
+                    title: '${f.title}',
+                  ),
+                ) ??
+                [],
           ],
         ),
       ],
@@ -289,10 +247,31 @@ class FacilitiesItemView extends StatelessWidget {
   }
 }
 
-class CinemaDetailImageSection extends StatelessWidget {
+class CinemaDetailImageSection extends StatefulWidget {
   const CinemaDetailImageSection({
     Key? key,
+    this.cinemaPoster,
   }) : super(key: key);
+
+  final String? cinemaPoster;
+
+  @override
+  State<CinemaDetailImageSection> createState() =>
+      _CinemaDetailImageSectionState();
+}
+
+class _CinemaDetailImageSectionState extends State<CinemaDetailImageSection> {
+  late FlickManager flickManager;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    flickManager = FlickManager(
+      videoPlayerController:
+          VideoPlayerController.network('${widget.cinemaPoster}'),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -301,29 +280,47 @@ class CinemaDetailImageSection extends StatelessWidget {
       backgroundColor: BACKGROUND_COLOR,
       automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset('assets/images/cinema_image.png'),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
-                ),
-                child: const Icon(
-                  Icons.play_arrow,
-                  color: Colors.white,
-                  size: MARGIN_XXL_LARGE,
-                ),
-              ),
-            ),
-          ],
-        ),
+        background:
+            Container(child: FlickVideoPlayer(flickManager: flickManager)),
+
+        // background: Stack(
+        //   children: [
+        //     // Positioned.fill(
+        //     //   child: Image.asset('assets/images/cinema_image.png'),
+        //     // ),
+        //     Positioned.fill(
+        //       child:
+        // _chewieController != null &&
+        //               _chewieController
+        //                   .videoPlayerController.value.isInitialized
+        //           ? Chewie(controller: _chewieController)
+        //           : Image.asset('assets/images/cinema_image.png'),
+        //     ),
+        //     Align(
+        //       alignment: Alignment.center,
+        //       child: Container(
+        //         padding: const EdgeInsets.all(10),
+        //         decoration: BoxDecoration(
+        //           shape: BoxShape.circle,
+        //           color: Colors.white.withOpacity(0.2),
+        //         ),
+        //         child: const Icon(
+        //           Icons.play_arrow,
+        //           color: Colors.white,
+        //           size: MARGIN_XXL_LARGE,
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    flickManager.dispose();
   }
 }

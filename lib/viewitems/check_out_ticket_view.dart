@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
+import 'package:movie_app_view_layer/data/vos/cinema_vo.dart';
+import 'package:movie_app_view_layer/data/vos/movie_vo.dart';
+import 'package:movie_app_view_layer/data/vos/snack_operation_vo.dart';
 import 'package:movie_app_view_layer/widgets/icon.dart';
 
+import '../data/vos/snack_vo.dart';
 import '../resources/colors.dart';
 import '../resources/dimens.dart';
 import '../widgets/divider_widget.dart';
 import 'date_item_view.dart';
 
-class CheckOutTicketView extends StatelessWidget {
+class CheckOutTicketView extends StatefulWidget {
   const CheckOutTicketView({
     Key? key,
+    this.checkOutData,
   }) : super(key: key);
 
+  final CheckOutDataVO? checkOutData;
+
+  @override
+  State<CheckOutTicketView> createState() => _CheckOutTicketViewState();
+}
+
+class _CheckOutTicketViewState extends State<CheckOutTicketView> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,14 +46,14 @@ class CheckOutTicketView extends StatelessWidget {
           SizedBox(height: MARGIN_MEDIUM_3),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: MARGIN_LARGE),
-            child: MovieTitleView(),
+            child: MovieTitleView(movie: widget.checkOutData?.mMovie),
           ),
           SizedBox(
             height: MARGIN_CARD_MEDIUM,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: MARGIN_LARGE),
-            child: CenimaInfoSection(),
+            child: CenimaInfoSection(cinema: widget.checkOutData?.mCinema),
           ),
           SizedBox(
             height: MARGIN_MEDIUM_3,
@@ -70,7 +83,13 @@ class CheckOutTicketView extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: MARGIN_LARGE),
-            child: FoodSection(),
+            child: FoodSection(
+              onTapCancel: (snack) {
+                widget.checkOutData?.mSnacks?.reduceSnack(snack);
+                setState(() {});
+              },
+              oSnack: widget.checkOutData?.mSnacks,
+            ),
           ),
           SizedBox(
             height: MARGIN_MEDIUM,
@@ -106,7 +125,7 @@ class CheckOutTicketView extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: MARGIN_LARGE),
-            child: TotalView(),
+            child: TotalView(checkOutDat: widget.checkOutData),
           ),
           SizedBox(
             height: MARGIN_MEDIUM_2,
@@ -233,8 +252,12 @@ void _showPolicyDialog(BuildContext context) {
               height: MARGIN_CARD_MEDIUM,
             ),
             Center(
-              child: FlatButton(
-                color: PRIMARY_COLOR,
+              child: TextButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    PRIMARY_COLOR,
+                  ),
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                 },
@@ -257,16 +280,20 @@ void _showPolicyDialog(BuildContext context) {
 class MovieTitleView extends StatelessWidget {
   const MovieTitleView({
     Key? key,
+    this.movie,
   }) : super(key: key);
 
+  final MovieVO? movie;
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Black Widow (3D) (U/A)',
+      '${movie?.title}',
+      //'Black Widow (3D) (U/A)',
       style: GoogleFonts.dmSans(
-          fontSize: TEXT_REGULAR_2X,
-          fontWeight: FontWeight.w500,
-          color: Colors.white),
+        fontSize: TEXT_REGULAR_2X,
+        fontWeight: FontWeight.w500,
+        color: Colors.white,
+      ),
     );
   }
 }
@@ -274,15 +301,18 @@ class MovieTitleView extends StatelessWidget {
 class CenimaInfoSection extends StatelessWidget {
   const CenimaInfoSection({
     Key? key,
+    this.cinema,
   }) : super(key: key);
 
+  final CinemaVO? cinema;
   @override
   Widget build(BuildContext context) {
     return Text.rich(
       TextSpan(
         children: <InlineSpan>[
           TextSpan(
-            text: 'JCGV : Junction City',
+            text: '${cinema?.name}',
+            //text: 'JCGV : Junction City',
             style: GoogleFonts.dmSans(
               fontSize: TEXT_REGULAR_2X,
               fontWeight: FontWeight.w400,
@@ -290,7 +320,7 @@ class CenimaInfoSection extends StatelessWidget {
             ),
           ),
           TextSpan(
-            text: '(SCREEN 2)',
+            text: '(SCREEN ${cinema?.timeSlot?.status})',
             style: GoogleFonts.dmSans(
               fontSize: TEXT_REGULAR_2X,
               fontWeight: FontWeight.w400,
@@ -339,10 +369,13 @@ class PolicyView extends StatelessWidget {
 class TotalView extends StatelessWidget {
   const TotalView({
     Key? key,
+    this.checkOutDat,
   }) : super(key: key);
 
+  final CheckOutDataVO? checkOutDat;
   @override
   Widget build(BuildContext context) {
+    final snackPrice = checkOutDat?.mSnacks?.totalPrice ?? 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -354,7 +387,7 @@ class TotalView extends StatelessWidget {
               color: PRIMARY_COLOR),
         ),
         Text(
-          '22500Ks',
+          '${snackPrice + 20000 + 500}Ks',
           style: GoogleFonts.inter(
               fontSize: TEXT_REGULAR_3X,
               fontWeight: FontWeight.w700,
@@ -408,7 +441,12 @@ class AdditionalFeeSection extends StatelessWidget {
 class FoodSection extends StatelessWidget {
   const FoodSection({
     Key? key,
+    this.oSnack,
+    required this.onTapCancel,
   }) : super(key: key);
+
+  final SnackOperationVO? oSnack;
+  final Function(SnackVO) onTapCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +485,8 @@ class FoodSection extends StatelessWidget {
               ],
             ),
             Text(
-              '20000ks',
+              '${oSnack?.totalPrice}Ks',
+              //'20000ks',
               style: GoogleFonts.dmSans(
                   fontSize: TEXT_REGULAR_2X,
                   fontWeight: FontWeight.w700,
@@ -458,17 +497,21 @@ class FoodSection extends StatelessWidget {
         SizedBox(
           height: MARGIN_CARD_MEDIUM_2,
         ),
-        Padding(
-          padding: const EdgeInsets.only(left: MARGIN_MEDIUM_2),
-          child: FoodItemView(title: 'Potatoe Chips (Qt. 1)', price: '10000ks'),
-        ),
-        SizedBox(
-          height: MARGIN_MEDIUM,
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: MARGIN_MEDIUM_2),
-          child: FoodItemView(title: 'Potatoe Chips (Qt. 1)', price: '10000ks'),
-        ),
+        ...oSnack?.snackList
+                .map(
+                  (snack) => Padding(
+                    padding: const EdgeInsets.only(left: MARGIN_MEDIUM_2),
+                    child: FoodItemView(
+                      onTapCancel: () {
+                        onTapCancel(snack);
+                      },
+                      title: '${snack.name} (Qt. ${snack.quantity})',
+                      price: '${(snack.price ?? 0) * (snack.quantity ?? 0)}ks',
+                    ),
+                  ),
+                )
+                .toList() ??
+            [],
       ],
     );
   }
@@ -479,11 +522,12 @@ class FoodItemView extends StatelessWidget {
     Key? key,
     required this.title,
     required this.price,
+    required this.onTapCancel,
   }) : super(key: key);
 
   final String title;
   final String price;
-
+  final Function onTapCancel;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -491,9 +535,14 @@ class FoodItemView extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.cancel,
-              color: PRIMARY_COLOR,
+            InkWell(
+              onTap: () {
+                onTapCancel();
+              },
+              child: Icon(
+                Icons.cancel,
+                color: PRIMARY_COLOR,
+              ),
             ),
             SizedBox(
               width: MARGIN_SMALL,

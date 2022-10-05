@@ -4,7 +4,7 @@ import 'package:movie_app_view_layer/pages/ticket_detail_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
 import 'package:movie_app_view_layer/resources/strings.dart';
-import 'package:movie_app_view_layer/view_items/ticket_view.dart';
+import 'package:movie_app_view_layer/viewitems/ticket_view.dart';
 
 class TicketPage extends StatelessWidget {
   const TicketPage({Key? key}) : super(key: key);

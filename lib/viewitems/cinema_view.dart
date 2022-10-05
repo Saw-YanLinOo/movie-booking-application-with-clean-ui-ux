@@ -1,27 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_app_view_layer/data/vos/cinema_vo.dart';
+import 'package:movie_app_view_layer/data/vos/facilities_vo.dart';
+import 'package:movie_app_view_layer/data/vos/time_slot_vo.dart';
 import 'package:movie_app_view_layer/pages/cinema_detail.dart';
 import '../resources/colors.dart';
 import '../resources/dimens.dart';
 
 class CinemaView extends StatelessWidget {
-  final Function onSelectTime;
-
   const CinemaView(
     this.onSelectTime, {
+    this.cinema,
     Key? key,
   }) : super(key: key);
 
+  final Function(TimeSlotVO?) onSelectTime;
+  final CinemaVO? cinema;
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
-      title: CinemaTitleView(),
-      trailing: SizedBox(),
-      subtitle: CinemaSubTitleView(),
+      title: CinemaTitleView(
+        cinema: cinema,
+      ),
+      trailing: const SizedBox(),
+      subtitle: CinemaSubTitleView(
+        fList: cinema?.facilities,
+      ),
       children: [
-        CinemaExpandedView(() {
-          onSelectTime();
-        }),
+        CinemaExpandedView(
+          (timeSlot) {
+            onSelectTime(timeSlot);
+          },
+          mCinema: cinema,
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(
               horizontal: MARGIN_MEDIUM_3, vertical: MARGIN_MEDIUM),
@@ -99,19 +110,24 @@ class CinemaView extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      FlatButton(
+                      TextButton(
                         onPressed: () {},
-                        color: BACKGROUND_COLOR,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            color: PRIMARY_COLOR,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            MARGIN_SMALL,
-                          ),
-                        ),
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                              PRIMARY_COLOR,
+                            ),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                side: const BorderSide(
+                                  color: PRIMARY_COLOR,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  MARGIN_SMALL,
+                                ),
+                              ),
+                            )),
                         child: Text(
-                          "Cancel",
+                          'Cancel',
                           style: GoogleFonts.inter(
                             fontSize: TEXT_REGULAR,
                             fontWeight: FontWeight.w700,
@@ -122,11 +138,15 @@ class CinemaView extends StatelessWidget {
                       SizedBox(
                         width: MARGIN_MEDIUM_2,
                       ),
-                      FlatButton(
-                        color: PRIMARY_COLOR,
+                      TextButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            PRIMARY_COLOR,
+                          ),
+                        ),
                         onPressed: () {},
                         child: Text(
-                          "Accept",
+                          'Accept',
                           style: GoogleFonts.inter(
                             fontSize: TEXT_REGULAR,
                             fontWeight: FontWeight.w700,
@@ -183,7 +203,7 @@ class AdditionInfoView extends StatelessWidget {
             width: MARGIN_MEDIUM_2,
             child: Image.asset('assets/icons/info_icon.png'),
           ),
-          SizedBox(
+          const SizedBox(
             width: MARGIN_MEDIUM,
           ),
           Text(
@@ -200,12 +220,13 @@ class AdditionInfoView extends StatelessWidget {
 }
 
 class CinemaExpandedView extends StatelessWidget {
-  final Function onSelectTime;
   const CinemaExpandedView(
     this.onSelectTime, {
     Key? key,
+    this.mCinema,
   }) : super(key: key);
-
+  final Function(TimeSlotVO?) onSelectTime;
+  final CinemaVO? mCinema;
   @override
   Widget build(BuildContext context) {
     var colors = [
@@ -222,11 +243,13 @@ class CinemaExpandedView extends StatelessWidget {
         crossAxisCount: 3,
         childAspectRatio: 1 / 0.8,
       ),
-      itemCount: 5,
+      itemCount: mCinema?.timeSlotList?.length,
       itemBuilder: (context, index) {
+        final timeSlot = mCinema?.timeSlotList?[index];
+
         return GestureDetector(
           onTap: () {
-            onSelectTime();
+            onSelectTime(timeSlot);
           },
           // child: Container(
           //   decoration: BoxDecoration(
@@ -244,7 +267,8 @@ class CinemaExpandedView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '12:30 PM',
+                  '${timeSlot?.startTime}',
+                  // '12:30 PM',
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: TEXT_REGULAR,
@@ -259,7 +283,7 @@ class CinemaExpandedView extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Screen 1',
+                  'Screen ${timeSlot?.status}',
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: TEXT_SMALL,
@@ -289,58 +313,35 @@ class CinemaExpandedView extends StatelessWidget {
 
 class CinemaSubTitleView extends StatelessWidget {
   const CinemaSubTitleView({
+    required this.fList,
     Key? key,
   }) : super(key: key);
 
+  final List<FacilitiesVO>? fList;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      //mainAxisSize: MainAxisSize.min,
       children: [
-        TextButton.icon(
-          onPressed: null,
-          icon: SizedBox(
-            width: MARGIN_MEDIUM_2,
-            height: MARGIN_MEDIUM_2,
-            child: Image.asset(
-              'assets/icons/parking_icon.png',
-            ),
-          ),
-          label: Text(
-            'Parking',
-            style: GoogleFonts.inter(
-              color: MOVIE_PAGE_TEXT_COLOR,
-            ),
-          ),
-        ),
-        TextButton.icon(
-          onPressed: null,
-          icon: const Icon(
-            Icons.fastfood_outlined,
-            color: MOVIE_PAGE_TEXT_COLOR,
-            size: MARGIN_MEDIUM_2,
-          ),
-          label: Text(
-            'Online Food',
-            style: GoogleFonts.inter(
-              color: MOVIE_PAGE_TEXT_COLOR,
-            ),
-          ),
-        ),
-        TextButton.icon(
-          onPressed: null,
-          icon: const Icon(
-            Icons.wheelchair_pickup,
-            color: MOVIE_PAGE_TEXT_COLOR,
-            size: MARGIN_MEDIUM_2,
-          ),
-          label: Text(
-            'Wheel Chair',
-            style: GoogleFonts.inter(
-              color: MOVIE_PAGE_TEXT_COLOR,
-            ),
-          ),
-        ),
+        ...fList?.map(
+              (f) => TextButton.icon(
+                onPressed: null,
+                icon: SizedBox(
+                  width: MARGIN_MEDIUM_2,
+                  height: MARGIN_MEDIUM_2,
+                  child: Image.network(
+                    '${f.img}',
+                  ),
+                ),
+                label: Text(
+                  '${f.title}',
+                  style: GoogleFonts.inter(
+                    color: MOVIE_PAGE_TEXT_COLOR,
+                  ),
+                ),
+              ),
+            ) ??
+            [],
       ],
     );
   }
@@ -348,28 +349,31 @@ class CinemaSubTitleView extends StatelessWidget {
 
 class CinemaTitleView extends StatelessWidget {
   const CinemaTitleView({
+    this.cinema,
     Key? key,
   }) : super(key: key);
+
+  final CinemaVO? cinema;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Text(
-          'JCGV: Junction City',
+          '${cinema?.name}',
           style: GoogleFonts.inter(
             color: Colors.white,
             fontSize: TEXT_REGULAR_2X,
             fontWeight: FontWeight.w600,
           ),
         ),
-        Spacer(),
+        const Spacer(),
         GestureDetector(
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const CinemaDetail(),
+                builder: (_) => CinemaDetail(mCinema: cinema),
               ),
             );
           },

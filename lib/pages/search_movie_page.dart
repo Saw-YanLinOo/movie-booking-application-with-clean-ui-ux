@@ -1,17 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:movie_app_view_layer/dummey/dummey_data.dart';
+import 'package:movie_app_view_layer/data/vos/movie_vo.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/strings.dart';
 
+import '../data/models/movie_model.dart';
+import '../data/models/movie_model_impl.dart';
 import '../resources/dimens.dart';
-import '../view_items/movie_view.dart';
+import '../viewitems/movie_view.dart';
 import '../widgets/search_drop_down_view.dart';
 import 'movie_detail_page.dart';
 
-class SearchMoviePage extends StatelessWidget {
+class SearchMoviePage extends StatefulWidget {
   final int index;
 
   const SearchMoviePage({required this.index, Key? key}) : super(key: key);
+
+  @override
+  State<SearchMoviePage> createState() => _SearchMoviePageState();
+}
+
+class _SearchMoviePageState extends State<SearchMoviePage> {
+  MovieModel mMovieModel = MovieModelImpl();
+
+  List<MovieVO>? mNowShowingMovie;
+  List<MovieVO>? mCommingSoonMovie;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.index == 0) {
+      _getNowShowingMovie();
+    } else {
+      _getCommingSoonMovie();
+    }
+  }
+
+  // Now Showing Movie
+  _getNowShowingMovie() {
+    mMovieModel.getNowPlayingMovie('1').then((movieList) {
+      mNowShowingMovie = movieList;
+      setState(() {});
+    });
+  }
+
+  // Comming Soon Movie
+  _getCommingSoonMovie() {
+    mMovieModel.getUpCommingMovie('1').then((movieList) {
+      mNowShowingMovie = movieList;
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +118,8 @@ class SearchMoviePage extends StatelessWidget {
           ),
           Expanded(
             child: MovieSectionView(
-              index == 0 ? nowShowingMovieList : upCommingMovieList,
+              widget.index == 0 ? mNowShowingMovie : mNowShowingMovie,
+              selectedIndex: widget.index,
             ),
           ),
         ],
@@ -91,41 +131,51 @@ class SearchMoviePage extends StatelessWidget {
 class MovieSectionView extends StatelessWidget {
   const MovieSectionView(
     this.movieList, {
+    this.selectedIndex,
     Key? key,
   }) : super(key: key);
 
-  final List<Map<String, String>> movieList;
+  final int? selectedIndex;
+  final List<MovieVO>? movieList;
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: MARGIN_LARGE,
-          mainAxisSpacing: MARGIN_LARGE,
-          childAspectRatio: 3 / 4,
-        ),
-        shrinkWrap: true,
-        itemCount: movieList.length,
-        padding: const EdgeInsets.only(
-            left: MARGIN_LARGE,
-            right: MARGIN_LARGE,
-            top: MARGIN_LARGE,
-            bottom: MARGIN_MEDIUM),
-        itemBuilder: (context, index) {
-          var movie = movieList[index];
-          return MovieItemView(
-            onPressedMovie: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MovieDetailPage(
-                    movie: movie,
-                  ),
-                ),
+    return movieList == null
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: MARGIN_LARGE,
+              mainAxisSpacing: MARGIN_LARGE,
+              childAspectRatio: 3 / 4,
+            ),
+            shrinkWrap: true,
+            itemCount: movieList?.length ?? 0,
+            padding: const EdgeInsets.only(
+              left: MARGIN_LARGE,
+              right: MARGIN_LARGE,
+              top: MARGIN_LARGE,
+              bottom: MARGIN_MEDIUM,
+            ),
+            itemBuilder: (context, index) {
+              var movie = movieList?[index] ?? MovieVO();
+              return MovieItemView(
+                onPressedMovie: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MovieDetailPage(
+                        movie: movie,
+                        index: selectedIndex,
+                      ),
+                    ),
+                  );
+                },
+                index: selectedIndex,
+                movie: movie,
               );
             },
-            movie: movie,
           );
-        });
   }
 }
