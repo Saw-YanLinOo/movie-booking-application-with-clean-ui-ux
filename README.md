@@ -1,4 +1,4 @@
-# Movie application with clean UI/UX
+# Movie booking application with clean UI/UX
 This is movie application for cinema. User can see now showing movies in cinema and also comming soon movies. Select your seats and booking your ticket, enjoy! Application is still in progress and make your contribution to go better. Another feature will add more...
 
 # Screenshots
