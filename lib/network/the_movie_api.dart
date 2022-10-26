@@ -64,7 +64,7 @@ abstract class TheMovieApi {
   @GET(ENDPOINT_GET_SNACKS)
   Future<SnackListResponse> getSnack(
     @Header(PARAM_AUTHORIZATION) String token,
-    @Query(PARAM_CATEGORY_ID) String categoryId,
+    @Query(PARAM_CATEGORY_ID) int categoryId,
   );
 
   @GET(ENDPOINT_GET_PAYMENT_TYPE)

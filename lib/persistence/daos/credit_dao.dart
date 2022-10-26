@@ -11,16 +11,24 @@ class CreditDao {
 
   factory CreditDao() => _singleton;
 
-  void saveCredit(int movieId, CreditListVO creditList) async {
+  void saveCreditByMovieId(int movieId, CreditListVO creditList) async {
     await getCreditBox().put(movieId, creditList);
   }
 
-  List<CreditListVO> getCredit() {
-    return getCreditBox().values.toList();
+  List<CreditVO>? getCreditListByMovieId(int movieId) {
+    return getCreditBox().get(movieId)?.creditList;
   }
 
-  CreditListVO? getCreditByMovieId(int movieId) {
-    return getCreditBox().get(movieId);
+  Stream<void> getCreditEventStream() {
+    return getCreditBox().watch();
+  }
+
+  Stream<List<CreditListVO>> getCreditListStream() {
+    return Stream.value(getCreditBox().values.toList());
+  }
+
+  Stream<List<CreditVO>?> getCreditListByMovieIdStream(int movieId) {
+    return Stream.value(getCreditBox().get(movieId)?.creditList);
   }
 
   Box<CreditListVO> getCreditBox() {

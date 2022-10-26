@@ -31,6 +31,42 @@ class MovieDao {
     return getMovieBox().get(movieId);
   }
 
+  List<MovieVO> getNowPlayingMovies() {
+    if (getAllMovies().isNotEmpty) {
+      return getAllMovies()
+          .where((movie) => movie.isNowShowing ?? false)
+          .toList();
+    } else {
+      return [];
+    }
+  }
+
+  List<MovieVO> getCommingSoonMovies() {
+    if (getAllMovies().isNotEmpty) {
+      return getAllMovies()
+          .where((movie) => movie.isCommingSoon ?? false)
+          .toList();
+    } else {
+      return [];
+    }
+  }
+
+  Stream<void> getMovieEventStream() {
+    return getMovieBox().watch();
+  }
+
+  Stream<List<MovieVO>> getNowPlayingMoviesStream() {
+    return Stream.value(getNowPlayingMovies());
+  }
+
+  Stream<List<MovieVO>> getCommingSoonMoviesStream() {
+    return Stream.value(getCommingSoonMovies());
+  }
+
+  Stream<MovieVO?> getMovieByIdStream(int movieId) {
+    return Stream.value(getMovieBox().get(movieId));
+  }
+
   Box<MovieVO> getMovieBox() {
     return Hive.box<MovieVO>(BOX_NAME_MOVIE_VO);
   }

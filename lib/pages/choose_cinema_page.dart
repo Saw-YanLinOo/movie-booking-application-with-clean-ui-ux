@@ -45,17 +45,17 @@ class _ChooseCinemaState extends State<ChooseCinema> {
   }
 
   _getCinema(DateTime date) {
-    mMovieModel
-        .getCinemaTimeSlot(DateFormat('yyyy-MM-dd').format(date))
-        .then((cinemaTimeSlots) {
-      cinemaList = cinemaTimeSlots;
-      setState(() {});
-    });
+    // mMovieModel
+    //     .getCinemaTimeSlot(DateFormat('yyyy-MM-dd').format(date))
+    //     .then((cinemaTimeSlots) {
+    //   cinemaList = cinemaTimeSlots;
+    //   setState(() {});
+    // });
 
     mMovieModel
         .getCinemaAndTimeSlotByDateFromDatabase(
             DateFormat('yyyy-MM-dd').format(date))
-        .then((cinemas) {
+        .listen((cinemas) {
       cinemaList = cinemas;
       setState(() {});
     });
@@ -123,6 +123,7 @@ class _ChooseCinemaState extends State<ChooseCinema> {
             child: DateViewSection(
               times: times,
               onTapDateCard: (time) {
+                widget.checkOutData?.selectDate = time;
                 _getCinema(time);
               },
             ),

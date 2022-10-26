@@ -10,7 +10,7 @@ class BannerDao {
 
   factory BannerDao() => _singleton;
 
-  void saveBanners(List<BannerVO> bannerList) async {
+  void saveBannerList(List<BannerVO> bannerList) async {
     Map<int?, BannerVO> bannerMap = {
       for (var banner in bannerList) banner.id: banner
     };
@@ -18,8 +18,16 @@ class BannerDao {
     await getBannerBox().putAll(bannerMap);
   }
 
-  List<BannerVO> getBanners() {
+  List<BannerVO> getBannerList() {
     return getBannerBox().values.toList();
+  }
+
+  Stream<void> getBannerEventStream() {
+    return getBannerBox().watch();
+  }
+
+  Stream<List<BannerVO>> getBannerListStream() {
+    return Stream.value(getBannerBox().values.toList());
   }
 
   Box<BannerVO> getBannerBox() {

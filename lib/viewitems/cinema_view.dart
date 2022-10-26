@@ -27,12 +27,14 @@ class CinemaView extends StatelessWidget {
         fList: cinema?.facilities,
       ),
       children: [
-        CinemaExpandedView(
-          (timeSlot) {
-            onSelectTime(timeSlot);
-          },
-          mCinema: cinema,
-        ),
+        cinema?.timeSlotList?.isNotEmpty ?? false
+            ? CinemaExpandedView(
+                (timeSlot) {
+                  onSelectTime(timeSlot);
+                },
+                timeSlotList: cinema?.timeSlotList,
+              )
+            : const SizedBox(),
         Padding(
           padding: const EdgeInsets.symmetric(
               horizontal: MARGIN_MEDIUM_3, vertical: MARGIN_MEDIUM),
@@ -223,10 +225,10 @@ class CinemaExpandedView extends StatelessWidget {
   const CinemaExpandedView(
     this.onSelectTime, {
     Key? key,
-    this.mCinema,
+    this.timeSlotList,
   }) : super(key: key);
   final Function(TimeSlotVO?) onSelectTime;
-  final CinemaVO? mCinema;
+  final List<TimeSlotVO>? timeSlotList;
   @override
   Widget build(BuildContext context) {
     var colors = [
@@ -243,25 +245,14 @@ class CinemaExpandedView extends StatelessWidget {
         crossAxisCount: 3,
         childAspectRatio: 1 / 0.8,
       ),
-      itemCount: mCinema?.timeSlotList?.length,
+      itemCount: timeSlotList?.length ?? 0,
       itemBuilder: (context, index) {
-        final timeSlot = mCinema?.timeSlotList?[index];
+        final timeSlot = timeSlotList?[index];
 
         return GestureDetector(
           onTap: () {
             onSelectTime(timeSlot);
           },
-          // child: Container(
-          //   decoration: BoxDecoration(
-          //     gradient:
-          //         SweepGradient(colors: [PRIMARY_COLOR, BACKGROUND_COLOR]),
-          //     borderRadius: BorderRadius.circular(
-          //       MARGIN_SMALL,
-          //     ),
-          //     shape: BoxShape.rectangle,
-          //     border: BoxBorder()
-          //   ),
-          // ),
           child: Chip(
             label: Column(
               mainAxisSize: MainAxisSize.min,

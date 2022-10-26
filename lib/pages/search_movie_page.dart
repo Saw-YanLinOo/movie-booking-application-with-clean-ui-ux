@@ -38,7 +38,7 @@ class _SearchMoviePageState extends State<SearchMoviePage> {
 
   // Now Showing Movie
   _getNowShowingMovie() {
-    mMovieModel.getNowPlayingMovie('1').then((movieList) {
+    mMovieModel.getNowPlayingMovieFromDatabase().listen((movieList) {
       mNowShowingMovie = movieList;
       setState(() {});
     });
@@ -46,8 +46,8 @@ class _SearchMoviePageState extends State<SearchMoviePage> {
 
   // Comming Soon Movie
   _getCommingSoonMovie() {
-    mMovieModel.getUpCommingMovie('1').then((movieList) {
-      mNowShowingMovie = movieList;
+    mMovieModel.getUpCommingMovieFromDatabase().listen((movieList) {
+      mCommingSoonMovie = movieList;
       setState(() {});
     });
   }
@@ -118,7 +118,7 @@ class _SearchMoviePageState extends State<SearchMoviePage> {
           ),
           Expanded(
             child: MovieSectionView(
-              widget.index == 0 ? mNowShowingMovie : mNowShowingMovie,
+              widget.index == 0 ? mNowShowingMovie : mCommingSoonMovie,
               selectedIndex: widget.index,
             ),
           ),

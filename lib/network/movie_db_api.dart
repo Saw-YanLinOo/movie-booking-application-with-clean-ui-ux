@@ -27,14 +27,14 @@ abstract class MovieDbApi {
 
   @GET('$ENDPOINT_GET_MOVIE_DETAILS/{movie_id}')
   Future<MovieVO?> getMovieDetail(
-    @Path(PARAM_MOVIE_ID) String movieId,
+    @Path(PARAM_MOVIE_ID) int movieId,
     @Query(PARAM_API_KEY) String apiKey,
     @Query(PARAM_LANGUAGE) String language,
   );
 
   @GET('$ENDPOINT_GET_CREDITS_BY_MOVIE/{movie_id}/credits')
   Future<GetCreditsByMovieResponse> getCreditsByMovieResponse(
-    @Path(PARAM_MOVIE_ID) String movieId,
+    @Path(PARAM_MOVIE_ID) int movieId,
     @Query(PARAM_API_KEY) String apiKey,
     @Query(PARAM_LANGUAGE) String language,
   );

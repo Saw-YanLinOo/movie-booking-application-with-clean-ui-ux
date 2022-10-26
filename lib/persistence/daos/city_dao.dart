@@ -15,8 +15,16 @@ class CityDao {
     await getCityBox().putAll(cityMap);
   }
 
-  List<CityVO> getCity() {
+  List<CityVO> getCityList() {
     return getCityBox().values.toList();
+  }
+
+  Stream<void> getCityEventStream() {
+    return getCityBox().watch();
+  }
+
+  Stream<List<CityVO>> getCityListStream() {
+    return Stream.value(getCityBox().values.toList());
   }
 
   Box<CityVO> getCityBox() {

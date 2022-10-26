@@ -65,14 +65,13 @@ class RetrofitMovieDataAgentImpl extends MovieDataAgent {
   }
 
   @override
-  Future<MovieVO?> getMovieDetail(String movieId) {
+  Future<MovieVO?> getMovieDetail(int movieId) {
     return movieApi.getMovieDetail(movieId, API_KEY, LANGUAGE_EN_US);
   }
 
   @override
-  Future<GetCreditsByMovieResponse> getCreditsByMovie(String movieId) {
-    return movieApi
-        .getCreditsByMovieResponse(movieId, API_KEY, LANGUAGE_EN_US);
+  Future<GetCreditsByMovieResponse> getCreditsByMovie(int movieId) {
+    return movieApi.getCreditsByMovieResponse(movieId, API_KEY, LANGUAGE_EN_US);
   }
 
   @override
@@ -115,7 +114,7 @@ class RetrofitMovieDataAgentImpl extends MovieDataAgent {
   }
 
   @override
-  Future<List<SnackVO>?> getSnack(String token, String categoryId) {
+  Future<List<SnackVO>?> getSnack(String token, int categoryId) {
     return api
         .getSnack(token, categoryId)
         .asStream()
@@ -142,8 +141,7 @@ class RetrofitMovieDataAgentImpl extends MovieDataAgent {
   }
 
   @override
-  Future<List<CinemaVO>?> getCinemaTimeSlot(
-      String token, String date) {
+  Future<List<CinemaVO>?> getCinemaTimeSlot(String token, String date) {
     return api
         .getCinemaAndTimeSlot(token, date)
         .asStream()

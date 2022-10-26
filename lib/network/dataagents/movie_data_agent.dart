@@ -25,14 +25,14 @@ abstract class MovieDataAgent {
   Future<List<BannerVO>?> getBanner();
   Future<List<MovieVO>?> getNowPlayingMovie(String page);
   Future<List<MovieVO>?> getUpCommingMovie(String page);
-  Future<MovieVO?> getMovieDetail(String movieId);
-  Future<GetCreditsByMovieResponse> getCreditsByMovie(String movieId);
+  Future<MovieVO?> getMovieDetail(int movieId);
+  Future<GetCreditsByMovieResponse> getCreditsByMovie(int movieId);
   Future<List<ConfigVO>?> getConfig();
   Future<List<CinemaVO>?> getCinema(String time);
   Future<List<SnackCategoryVO>?> getSnackCategory(String token);
-  Future<List<SnackVO>?> getSnack(String token, String categoryId);
+  Future<List<SnackVO>?> getSnack(String token, int categoryId);
   Future<List<PaymentVO>?> getPaymentType(String token);
-  Future<List<CinemaVO>?> getCinemaTimeSlot(
-      String token, String date);
-  Future<CheckOutResponse> checkOut(String token, CheckOutRequest checkOutRequest);
+  Future<List<CinemaVO>?> getCinemaTimeSlot(String token, String date);
+  Future<CheckOutResponse> checkOut(
+      String token, CheckOutRequest checkOutRequest);
 }

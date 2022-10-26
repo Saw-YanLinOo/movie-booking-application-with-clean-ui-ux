@@ -33,7 +33,7 @@ class _FoodPageState extends State<FoodPage> {
     // TODO: implement initState
     super.initState();
 
-    mMovieModel.getSnackCategoryFromDatabase().then((categoryList) {
+    mMovieModel.getSnackCategoryFromDatabase().listen((categoryList) {
       snackCategoryList = categoryList;
       snackCategoryList?.insert(0, SnackCategoryVO(title: 'All'));
       setState(() {});
@@ -43,12 +43,12 @@ class _FoodPageState extends State<FoodPage> {
 
   _getSnack(int categoryId) {
     // Network
-    mMovieModel.getSnack('$categoryId').then((snacks) {
-      snackList = snacks;
-      setState(() {});
-    });
+    // mMovieModel.getSnack('$categoryId').then((snacks) {
+    //   snackList = snacks;
+    //   setState(() {});
+    // });
     //Database
-    mMovieModel.getSnackByCatIdFromDatabase(categoryId).then((snacks) {
+    mMovieModel.getSnackByCatIdFromDatabase(categoryId).listen((snacks) {
       snackList = snacks;
       setState(() {});
     });

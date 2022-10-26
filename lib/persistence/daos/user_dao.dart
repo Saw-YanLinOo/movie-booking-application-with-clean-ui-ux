@@ -17,6 +17,20 @@ class UserDao {
     return getUserBox().values.isNotEmpty ? getUserBox().values.first : null;
   }
 
+  String getUserToken() {
+    return getUserBox().values.isNotEmpty
+        ? getUserBox().values.first.token ?? ''
+        : '';
+  }
+
+  Stream<void> getUserEventStream() {
+    return getUserBox().watch();
+  }
+
+  Stream<UserVo?> getUserStream() {
+    return Stream.value(getUser());
+  }
+
   Box<UserVo> getUserBox() {
     return Hive.box<UserVo>(BOX_NAME_USER_VO);
   }

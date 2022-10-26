@@ -18,32 +18,32 @@ abstract class MovieModel {
   // Network
   Future<GetOtpResponse> getOtp(String phone);
   Future<SignInWithPhoneResponse> signInWithPhone(String phone, String otp);
-  Future<List<CityVO>?> getCity();
+  void getCity();
   Future<GetOtpResponse> setCity(String cityId);
-  Future<List<BannerVO>?> getBanner();
-  Future<List<MovieVO>?> getNowPlayingMovie(String page);
-  Future<List<MovieVO>?> getUpCommingMovie(String page);
-  Future<MovieVO?> getMovieDetail(String movieId);
-  Future<List<CreditVO>?> getCreditsByMovie(String movieId);
-  Future<List<ConfigVO>?> getConfig();
-  Future<List<CinemaVO>?> getCinema(String date);
-  Future<List<SnackCategoryVO>?> getSnackCategory();
-  Future<List<SnackVO>?> getSnack(String categoryId);
-  Future<List<PaymentVO>?> getPaymentType();
-  Future<List<CinemaVO>?> getCinemaTimeSlot(String date);
+  void getBanner();
+  void getNowPlayingMovie(String page);
+  void getUpCommingMovie(String page);
+  void getMovieDetail(int movieId);
+  void getCreditsByMovie(int movieId);
+  void getConfig();
+  void getCinema(String date);
+  void getCinemaTimeSlot(String date);
+  void getSnackCategory();
+  void getSnack(int categoryId);
+  void getPaymentType();
   Future<CheckOutResponse> checkOut(CheckOutRequest checkOutRequest);
 
   // Database
   Future<List<ConfigVO>?> getConfigFromDatabase();
-  Future<UserVo?> getUserFromDatabase();
-  Future<List<CityVO>?> getCityFromDatabase();
-  Future<List<BannerVO>?> getBannerFromDatabase();
-  Future<List<MovieVO>?> getNowPlayingMovieFromDatabase();
-  Future<List<MovieVO>?> getUpCommingMovieFromDatabase();
-  Future<MovieVO?> getMovieDetailFromDatabase(int movieId);
-  Future<List<CreditVO>?> getCreditsByMovieIdFromDatabase(int movieId);
-  Future<List<CinemaVO>?> getCinemaAndTimeSlotByDateFromDatabase(String date);
-  Future<List<SnackCategoryVO>?> getSnackCategoryFromDatabase();
-  Future<List<SnackVO>?> getSnackByCatIdFromDatabase(int categoryId);
-  Future<List<PaymentVO>?> getPaymentTypeFromDatabase();
+  Stream<UserVo?> getUserFromDatabase();
+  Stream<List<CityVO>?> getCityFromDatabase();
+  Stream<List<BannerVO>?> getBannerFromDatabase();
+  Stream<List<MovieVO>?> getNowPlayingMovieFromDatabase();
+  Stream<List<MovieVO>?> getUpCommingMovieFromDatabase();
+  Stream<MovieVO?> getMovieDetailFromDatabase(int movieId);
+  Stream<List<CreditVO>?> getCreditsByMovieIdFromDatabase(int movieId);
+  Stream<List<CinemaVO>?> getCinemaAndTimeSlotByDateFromDatabase(String date);
+  Stream<List<SnackCategoryVO>?> getSnackCategoryFromDatabase();
+  Stream<List<SnackVO>?> getSnackByCatIdFromDatabase(int categoryId);
+  Stream<List<PaymentVO>?> getPaymentTypeFromDatabase();
 }

@@ -41,23 +41,17 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     super.initState();
 
     // Movie Detail
-    mMovieModel.getMovieDetail('${widget.movie.id}').then((movie) {
-      mMovie = movie;
-      setState(() {});
-    });
-    mMovieModel.getMovieDetailFromDatabase(widget.movie.id ?? 0).then((movie) {
+    mMovieModel
+        .getMovieDetailFromDatabase(widget.movie.id ?? 0)
+        .listen((movie) {
       mMovie = movie;
       setState(() {});
     });
 
     // Credit
-    mMovieModel.getCreditsByMovie('${widget.movie.id}').then((creditList) {
-      mMovieCredit = creditList;
-      setState(() {});
-    });
     mMovieModel
         .getCreditsByMovieIdFromDatabase(widget.movie.id ?? 0)
-        .then((creditList) {
+        .listen((creditList) {
       mMovieCredit = creditList;
       setState(() {});
     });

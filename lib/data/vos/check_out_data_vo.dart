@@ -9,11 +9,14 @@ class CheckOutDataVO {
 
   CinemaVO? mCinema;
 
+  DateTime? selectDate;
+
   SnackOperationVO? mSnacks;
 
   CheckOutDataVO({
     this.mMovie,
     this.mCinema,
+    this.selectDate,
     this.mSnacks,
   });
 }

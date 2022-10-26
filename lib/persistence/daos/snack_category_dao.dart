@@ -18,8 +18,16 @@ class SnackCategoryDao {
     await getSnackCategoryBox().putAll(snackCatMap);
   }
 
-  List<SnackCategoryVO> getSnackCategory() {
+  List<SnackCategoryVO> getSnackCategoryList() {
     return getSnackCategoryBox().values.toList();
+  }
+
+  Stream<void> getSnackCategoryEventStream() {
+    return getSnackCategoryBox().watch();
+  }
+
+  Stream<List<SnackCategoryVO>> getSnackCategoryListStream() {
+    return Stream.value(getSnackCategoryBox().values.toList());
   }
 
   Box<SnackCategoryVO> getSnackCategoryBox() {

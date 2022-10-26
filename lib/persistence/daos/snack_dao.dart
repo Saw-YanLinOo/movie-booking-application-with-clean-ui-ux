@@ -19,8 +19,23 @@ class SnackDao {
     await getSnackBox().putAll(snackCatMap);
   }
 
-  List<SnackVO> getSnack() {
-    return getSnackBox().values.toList();
+  List<SnackVO> getSnackList(int categoryId) {
+    if (categoryId == 0) {
+      return getSnackBox().values.toList();
+    } else {
+      return getSnackBox()
+          .values
+          .where((snack) => snack.categoryId == categoryId)
+          .toList();
+    }
+  }
+
+  Stream<void> getSnackEventStream() {
+    return getSnackBox().watch();
+  }
+
+  Stream<List<SnackVO>> getSnackListStream(int categoryId) {
+    return Stream.value(getSnackList(categoryId));
   }
 
   Box<SnackVO> getSnackBox() {

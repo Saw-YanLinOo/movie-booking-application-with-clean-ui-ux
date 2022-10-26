@@ -24,7 +24,7 @@ class _LogoPageState extends State<LogoPage> {
     // TODO: implement initState
     super.initState();
 
-    mMovieModel.getUserFromDatabase().then((user) {
+    mMovieModel.getUserFromDatabase().listen((user) {
       if (user?.token != null) {
         Navigator.pushAndRemoveUntil(
           context,

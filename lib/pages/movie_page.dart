@@ -43,12 +43,7 @@ class _MoviePageState extends State<MoviePage>
 
   // Banner
   _getBanner() {
-    mMovieModel.getBanner().then((bannerList) {
-      mBannerList = bannerList;
-      setState(() {});
-    });
-
-    mMovieModel.getBannerFromDatabase().then((bannerList) {
+    mMovieModel.getBannerFromDatabase().listen((bannerList) {
       mBannerList = bannerList;
       setState(() {});
     });
@@ -56,12 +51,7 @@ class _MoviePageState extends State<MoviePage>
 
   // Now Showing Movie
   _getNowShowingMovie() {
-    mMovieModel.getNowPlayingMovie('1').then((movieList) {
-      mNowShowingMovie = movieList;
-      setState(() {});
-    });
-
-    mMovieModel.getNowPlayingMovieFromDatabase().then((movieList) {
+    mMovieModel.getNowPlayingMovieFromDatabase().listen((movieList) {
       mNowShowingMovie = movieList;
       setState(() {});
     });
@@ -69,11 +59,7 @@ class _MoviePageState extends State<MoviePage>
 
   // Comming Soon Movie
   _getCommingSoonMovie() {
-    mMovieModel.getUpCommingMovie('1').then((movieList) {
-      mCommingSoonMovie = movieList;
-      setState(() {});
-    });
-    mMovieModel.getUpCommingMovieFromDatabase().then((movieList) {
+    mMovieModel.getUpCommingMovieFromDatabase().listen((movieList) {
       mCommingSoonMovie = movieList;
       setState(() {});
     });
@@ -155,6 +141,17 @@ class _MoviePageState extends State<MoviePage>
             child: MovieSectionView(
               selectedIndex: index,
               index == 0 ? mNowShowingMovie : mCommingSoonMovie,
+              onTapMovie: (movie) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MovieDetailPage(
+                      movie: movie,
+                      index: index,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -168,10 +165,12 @@ class MovieSectionView extends StatelessWidget {
     this.movieList, {
     Key? key,
     this.selectedIndex,
+    required this.onTapMovie,
   }) : super(key: key);
 
   final List<MovieVO>? movieList;
   final int? selectedIndex;
+  final Function(MovieVO) onTapMovie;
 
   @override
   Widget build(BuildContext context) {
@@ -195,15 +194,7 @@ class MovieSectionView extends StatelessWidget {
                 index: selectedIndex,
                 movie: movie,
                 onPressedMovie: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MovieDetailPage(
-                        movie: movie,
-                        index: selectedIndex,
-                      ),
-                    ),
-                  );
+                  onTapMovie(movie);
                 },
               );
             },

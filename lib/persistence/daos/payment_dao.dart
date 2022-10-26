@@ -17,8 +17,16 @@ class PaymetnDao {
     await getPaymentBox().putAll(paymentMap);
   }
 
-  List<PaymentVO> getPayment() {
+  List<PaymentVO> getPaymentList() {
     return getPaymentBox().values.toList();
+  }
+
+  Stream<void> getPaymentEventStream() {
+    return getPaymentBox().watch();
+  }
+
+  Stream<List<PaymentVO>> getPaymentListStream() {
+    return Stream.value(getPaymentBox().values.toList());
   }
 
   Box<PaymentVO> getPaymentBox() {

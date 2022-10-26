@@ -61,7 +61,7 @@ class _OtpPageState extends State<OtpPage> {
                 ),
                 child: ComfirmOtpButton(
                   onPressed: () {
-                    _confirmOtp(context, '123456');
+                    _confirmOtp(context, _otpController.text);
                   },
                 ),
               ),

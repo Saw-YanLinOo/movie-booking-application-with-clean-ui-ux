@@ -32,13 +32,13 @@ class _PaymentPageState extends State<PaymentPage> {
     super.initState();
 
     // Network
-    mMovieModel.getPaymentType().then((pList) {
-      mPyament = pList;
-      setState(() {});
-    });
+    // mMovieModel.getPaymentType().then((pList) {
+    //   mPyament = pList;
+    //   setState(() {});
+    // });
 
     // Database
-    mMovieModel.getPaymentTypeFromDatabase().then((pList) {
+    mMovieModel.getPaymentTypeFromDatabase().listen((pList) {
       mPyament = pList;
       setState(() {});
     });
@@ -125,7 +125,7 @@ class _PaymentPageState extends State<PaymentPage> {
   _checkOut(BuildContext context, PaymentVO? payment) {
     final checkOutRequest = CheckOutRequest(
       seatNumber: 'N-8',
-      bookingDate: DateTime.now().toString(),
+      bookingDate: '${widget.checkOutData?.selectDate}',
       cinemaDayTimeSlotId: widget.checkOutData?.mCinema?.timeSlot?.id,
       movieId: widget.checkOutData?.mMovie?.id,
       paymentTypeId: payment?.id,

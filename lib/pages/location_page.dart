@@ -25,12 +25,7 @@ class _LocationPageState extends State<LocationPage> {
     // TODO: implement initState
     super.initState();
 
-    mMovieModel.getCity().then((citys) {
-      mCityList = citys;
-      setState(() {});
-    });
-
-    mMovieModel.getCityFromDatabase().then((citys) {
+    mMovieModel.getCityFromDatabase().listen((citys) {
       mCityList = citys;
       setState(() {});
     });
