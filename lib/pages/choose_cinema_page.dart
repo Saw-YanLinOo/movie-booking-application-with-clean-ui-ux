@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:movie_app_view_layer/data/vos/check_out_data_vo.dart';
-import 'package:movie_app_view_layer/data/vos/cinema_and_time_slot_vo.dart';
 import 'package:movie_app_view_layer/data/vos/config_vo.dart';
 import 'package:movie_app_view_layer/pages/search_cinema_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
@@ -15,6 +14,7 @@ import '../resources/dimens.dart';
 import '../viewitems/cinema_view.dart';
 import '../widgets/location_text.dart';
 import 'choose_seat_page.dart';
+import 'package:intl/intl.dart';
 
 class ChooseCinema extends StatefulWidget {
   const ChooseCinema({Key? key, this.checkOutData}) : super(key: key);
@@ -29,7 +29,7 @@ class _ChooseCinemaState extends State<ChooseCinema> {
 
   late List<DateTime> times;
   late List<ConfigVO>? configs;
-  late List<CinemaVO>? cinemaList;
+  List<CinemaVO>? cinemaList;
 
   @override
   void initState() {
@@ -37,33 +37,31 @@ class _ChooseCinemaState extends State<ChooseCinema> {
     super.initState();
 
     times = _generateTwoWeek();
-    configs = mMovieModel.configs;
-    _getCinema(DateTime.now());
-  }
-
-  _getCinema(DateTime time) {
-    cinemaList = null;
-    setState(() {});
-    mMovieModel.getCinema(time.toIso8601String()).then((cinemas) {
-      cinemaList = cinemas;
-      _getCinemaTimeSlot(time);
-      //setState(() {});
+    mMovieModel.getConfigFromDatabase().then((configList) {
+      configs = configList;
+      setState(() {});
     });
+    _getCinema(times.first);
   }
 
-  _getCinemaTimeSlot(DateTime time) {
+  _getCinema(DateTime date) {
     mMovieModel
-        .getCinemaTimeSlot(time.toIso8601String())
+        .getCinemaTimeSlot(DateFormat('yyyy-MM-dd').format(date))
         .then((cinemaTimeSlots) {
-      var len = cinemaList?.length ?? 0;
-      for (var i = 0; i < len; i++) {
-        if (cinemaList?[i].id == cinemaTimeSlots?[i].id) {
-          cinemaList?[i].timeSlotList = cinemaTimeSlots?[i].timeSlots;
-        }
-      }
+      cinemaList = cinemaTimeSlots;
+      setState(() {});
+    });
+
+    mMovieModel
+        .getCinemaAndTimeSlotByDateFromDatabase(
+            DateFormat('yyyy-MM-dd').format(date))
+        .then((cinemas) {
+      cinemaList = cinemas;
       setState(() {});
     });
   }
+
+  _getCinemaTimeSlot(DateTime time) {}
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +397,7 @@ class DateInfoView extends StatelessWidget {
           height: MARGIN_MEDIUM_2,
         ),
         AutoSizeText(
-          Jiffy(time).EEEE,
+          checkTime(time),
           maxLines: 1,
           style: GoogleFonts.inter(
             //fontSize: MARGIN_MEDIUM_2,
@@ -420,7 +418,7 @@ class DateInfoView extends StatelessWidget {
           height: MARGIN_MEDIUM,
         ),
         AutoSizeText(
-          checkTime(time),
+          Jiffy(time).format('d'),
           maxLines: 1,
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w700,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:movie_app_view_layer/data/vos/movie_vo.dart';
 import 'package:movie_app_view_layer/network/api_constants.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
@@ -78,7 +79,7 @@ class MovieItemHeaderView extends StatelessWidget {
         child: Visibility(
           visible: index == 0 ? false : true,
           child: Container(
-            width: MediaQuery.of(context).size.width / 9,
+            width: MediaQuery.of(context).size.width / 8,
             margin: const EdgeInsets.symmetric(
               horizontal: MARGIN_MEDIUM,
               vertical: MARGIN_MEDIUM,
@@ -91,7 +92,13 @@ class MovieItemHeaderView extends StatelessWidget {
               color: PRIMARY_COLOR,
               borderRadius: BorderRadius.circular(MARGIN_MEDIUM),
             ),
-            child: Text('${date?.day}'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AutoSizeText(Jiffy(date).format('do'), maxLines: 1),
+                AutoSizeText(Jiffy(date).MMM.toUpperCase(), maxLines: 1),
+              ],
+            ),
           ),
         ),
       ),

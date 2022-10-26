@@ -41,8 +41,14 @@ class _MoviePageState extends State<MoviePage>
     _getNowShowingMovie();
   }
 
+  // Banner
   _getBanner() {
     mMovieModel.getBanner().then((bannerList) {
+      mBannerList = bannerList;
+      setState(() {});
+    });
+
+    mMovieModel.getBannerFromDatabase().then((bannerList) {
       mBannerList = bannerList;
       setState(() {});
     });
@@ -54,11 +60,20 @@ class _MoviePageState extends State<MoviePage>
       mNowShowingMovie = movieList;
       setState(() {});
     });
+
+    mMovieModel.getNowPlayingMovieFromDatabase().then((movieList) {
+      mNowShowingMovie = movieList;
+      setState(() {});
+    });
   }
 
   // Comming Soon Movie
   _getCommingSoonMovie() {
     mMovieModel.getUpCommingMovie('1').then((movieList) {
+      mCommingSoonMovie = movieList;
+      setState(() {});
+    });
+    mMovieModel.getUpCommingMovieFromDatabase().then((movieList) {
       mCommingSoonMovie = movieList;
       setState(() {});
     });

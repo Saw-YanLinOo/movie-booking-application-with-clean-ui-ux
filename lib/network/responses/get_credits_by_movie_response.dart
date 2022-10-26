@@ -7,7 +7,7 @@ part 'get_credits_by_movie_response.g.dart';
 
 @JsonSerializable()
 class GetCreditsByMovieResponse {
-  @JsonKey(name: 'code')
+  @JsonKey(name: 'id')
   int? id;
 
   @JsonKey(name: 'cast')

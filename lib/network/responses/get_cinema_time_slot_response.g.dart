@@ -12,7 +12,7 @@ GetCinemaTimeSlotResponse _$GetCinemaTimeSlotResponseFromJson(
       code: json['code'] as int?,
       message: json['message'] as String?,
       data: (json['data'] as List<dynamic>?)
-          ?.map((e) => CinemaAndTimeSlotVO.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => CinemaVO.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

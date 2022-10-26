@@ -31,7 +31,14 @@ class _PaymentPageState extends State<PaymentPage> {
     // TODO: implement initState
     super.initState();
 
+    // Network
     mMovieModel.getPaymentType().then((pList) {
+      mPyament = pList;
+      setState(() {});
+    });
+
+    // Database
+    mMovieModel.getPaymentTypeFromDatabase().then((pList) {
       mPyament = pList;
       setState(() {});
     });
@@ -44,8 +51,13 @@ class _PaymentPageState extends State<PaymentPage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: BACKGROUND_COLOR,
-        leading: const Icon(
-          Icons.arrow_back_ios,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_ios,
+          ),
         ),
         centerTitle: true,
         title: const CheckOutTitle(title: PAYMENT_TEXT),

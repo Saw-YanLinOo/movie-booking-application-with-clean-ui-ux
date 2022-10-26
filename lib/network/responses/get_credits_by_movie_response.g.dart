@@ -9,7 +9,7 @@ part of 'get_credits_by_movie_response.dart';
 GetCreditsByMovieResponse _$GetCreditsByMovieResponseFromJson(
         Map<String, dynamic> json) =>
     GetCreditsByMovieResponse(
-      id: json['code'] as int?,
+      id: json['id'] as int?,
       cost: (json['cast'] as List<dynamic>?)
           ?.map((e) => CreditVO.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -18,6 +18,6 @@ GetCreditsByMovieResponse _$GetCreditsByMovieResponseFromJson(
 Map<String, dynamic> _$GetCreditsByMovieResponseToJson(
         GetCreditsByMovieResponse instance) =>
     <String, dynamic>{
-      'code': instance.id,
+      'id': instance.id,
       'cast': instance.cost,
     };

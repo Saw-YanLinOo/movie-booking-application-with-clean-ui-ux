@@ -4,6 +4,7 @@ import 'package:movie_app_view_layer/pages/ticket_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/widgets/icon.dart';
 
+import '../data/models/movie_model_impl.dart';
 import 'choose_cinema_page.dart';
 import 'movie_page.dart';
 
@@ -25,6 +26,16 @@ class _HomePageState extends State<HomePage> {
     TicketPage(),
     ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    // preload snack category
+    MovieModelImpl().getSnackCategory();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

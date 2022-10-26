@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_app_view_layer/data/models/movie_model.dart';
 import 'package:movie_app_view_layer/data/models/movie_model_impl.dart';
 import 'package:movie_app_view_layer/data/vos/city_vo.dart';
-import 'package:movie_app_view_layer/main.dart';
 import 'package:movie_app_view_layer/pages/home_page.dart';
 import 'package:movie_app_view_layer/resources/colors.dart';
 import 'package:movie_app_view_layer/resources/dimens.dart';
@@ -27,6 +26,11 @@ class _LocationPageState extends State<LocationPage> {
     super.initState();
 
     mMovieModel.getCity().then((citys) {
+      mCityList = citys;
+      setState(() {});
+    });
+
+    mMovieModel.getCityFromDatabase().then((citys) {
       mCityList = citys;
       setState(() {});
     });

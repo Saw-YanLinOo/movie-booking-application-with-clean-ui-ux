@@ -33,18 +33,22 @@ class _FoodPageState extends State<FoodPage> {
     // TODO: implement initState
     super.initState();
 
-    mMovieModel.getSnackCategory().then((categoryList) {
+    mMovieModel.getSnackCategoryFromDatabase().then((categoryList) {
       snackCategoryList = categoryList;
       snackCategoryList?.insert(0, SnackCategoryVO(title: 'All'));
       setState(() {});
     });
-    _getSnack('');
+    _getSnack(0);
   }
 
-  _getSnack(String categoryId) {
-    snackList = null;
-    setState(() {});
-    mMovieModel.getSnack(categoryId).then((snacks) {
+  _getSnack(int categoryId) {
+    // Network
+    mMovieModel.getSnack('$categoryId').then((snacks) {
+      snackList = snacks;
+      setState(() {});
+    });
+    //Database
+    mMovieModel.getSnackByCatIdFromDatabase(categoryId).then((snacks) {
       snackList = snacks;
       setState(() {});
     });
@@ -97,7 +101,7 @@ class _FoodPageState extends State<FoodPage> {
                   ),
                   child: FoodTitleSectionView(
                     onTapCategory: (value) {
-                      _getSnack(value.toString());
+                      _getSnack(value);
                     },
                     categoryList: snackCategoryList,
                   ),

@@ -40,12 +40,24 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     // TODO: implement initState
     super.initState();
 
+    // Movie Detail
     mMovieModel.getMovieDetail('${widget.movie.id}').then((movie) {
       mMovie = movie;
       setState(() {});
     });
+    mMovieModel.getMovieDetailFromDatabase(widget.movie.id ?? 0).then((movie) {
+      mMovie = movie;
+      setState(() {});
+    });
 
+    // Credit
     mMovieModel.getCreditsByMovie('${widget.movie.id}').then((creditList) {
+      mMovieCredit = creditList;
+      setState(() {});
+    });
+    mMovieModel
+        .getCreditsByMovieIdFromDatabase(widget.movie.id ?? 0)
+        .then((creditList) {
       mMovieCredit = creditList;
       setState(() {});
     });
