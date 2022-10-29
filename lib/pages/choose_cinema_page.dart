@@ -27,8 +27,8 @@ class ChooseCinema extends StatefulWidget {
 class _ChooseCinemaState extends State<ChooseCinema> {
   MovieModel mMovieModel = MovieModelImpl();
 
-  late List<DateTime> times;
-  late List<ConfigVO>? configs;
+  List<DateTime> times = [];
+  List<ConfigVO>? configs;
   List<CinemaVO>? cinemaList;
 
   @override
